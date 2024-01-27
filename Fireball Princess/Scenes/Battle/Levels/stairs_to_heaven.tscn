@@ -1,0 +1,19 @@
+[gd_scene load_steps=3 format=3 uid="uid://chua1sh6nwjbx"]
+
+[ext_resource type="PackedScene" uid="uid://decqcbyhe6v5k" path="res://3D/Levels/Stairs to Heaven/ground.glb" id="1_ocac3"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_fwv3m"]
+size = Vector3(27.0097, 3.20056, 5.04858)
+
+[node name="Stairs to Heaven" type="Node3D"]
+
+[node name="StaticBody3D" type="StaticBody3D" parent="." groups=["GROUND"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -13.745, 0, 0)
+collision_mask = 3
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="StaticBody3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 13.5404, -1.55499, 2.47913)
+shape = SubResource("BoxShape3D_fwv3m")
+
+[node name="ground" parent="StaticBody3D" instance=ExtResource("1_ocac3")]
+transform = Transform3D(0.5, 0, 0, 0, 0.5, 0, 0, 0, 0.5, 0, 0, 0)

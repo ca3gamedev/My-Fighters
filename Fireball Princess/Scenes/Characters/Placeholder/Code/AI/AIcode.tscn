@@ -1,0 +1,44 @@
+[gd_scene load_steps=8 format=3 uid="uid://dj7qcit8kada3"]
+
+[ext_resource type="Script" path="res://Scenes/Characters/Placeholder/Code/AI/AIcode.gd" id="1_owlo6"]
+[ext_resource type="Script" path="res://Scenes/Characters/Placeholder/Code/Start.gd" id="1_y6v5h"]
+[ext_resource type="Script" path="res://Scenes/Characters/Placeholder/Code/Data.gd" id="2_0f03n"]
+[ext_resource type="Script" path="res://Scenes/Characters/Placeholder/Code/AI/AI.gd" id="3_gjxsc"]
+[ext_resource type="Script" path="res://Scenes/Characters/Placeholder/Code/AI/BRAIN.gd" id="4_pxfph"]
+[ext_resource type="Script" path="res://Scenes/Characters/Placeholder/Code/AI/AIIDLE.gd" id="5_v0fcc"]
+[ext_resource type="Script" path="res://Scenes/Characters/Placeholder/Code/AI/AIWALK.gd" id="6_rnyh1"]
+
+[node name="Code" type="Node"]
+script = ExtResource("1_owlo6")
+
+[node name="Start" type="Node" parent="."]
+unique_name_in_owner = true
+script = ExtResource("1_y6v5h")
+
+[node name="Data" type="Node" parent="."]
+unique_name_in_owner = true
+script = ExtResource("2_0f03n")
+
+[node name="AI" type="Node" parent="."]
+unique_name_in_owner = true
+script = ExtResource("3_gjxsc")
+
+[node name="BRAIN" type="Node" parent="AI"]
+script = ExtResource("4_pxfph")
+xdistance = 3.0
+smalldistance = 1.5
+
+[node name="Timer" type="Timer" parent="AI/BRAIN"]
+autostart = true
+
+[node name="SUBMIND" type="Node" parent="AI"]
+
+[node name="IDLE" type="Node" parent="AI"]
+script = ExtResource("5_v0fcc")
+
+[node name="WALK" type="Node" parent="AI"]
+script = ExtResource("6_rnyh1")
+walk_speed = 3.0
+xdistance = 10.0
+
+[connection signal="timeout" from="AI/BRAIN/Timer" to="AI/BRAIN" method="_on_timer_timeout"]
