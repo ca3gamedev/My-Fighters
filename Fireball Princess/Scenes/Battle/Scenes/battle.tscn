@@ -1,4 +1,4 @@
-[gd_scene load_steps=26 format=3 uid="uid://cxafx6q1ohpok"]
+[gd_scene load_steps=13 format=3 uid="uid://cxafx6q1ohpok"]
 
 [ext_resource type="PackedScene" uid="uid://dm4ascb587t0" path="res://Scenes/Characters/Placeholder/Fiona.tscn" id="1_h3mgn"]
 [ext_resource type="PackedScene" uid="uid://dm2hrrlme3o7n" path="res://Scenes/Characters/Placeholder/FionaAI.tscn" id="2_rh822"]
@@ -7,18 +7,6 @@
 [ext_resource type="Script" path="res://addons/phantom_camera/scripts/phantom_camera/phantom_camera_3D.gd" id="5_xiqj0"]
 [ext_resource type="Script" path="res://addons/phantom_camera/scripts/resources/camera_3D_resource.gd" id="6_dv2r2"]
 [ext_resource type="Script" path="res://addons/phantom_camera/scripts/phantom_camera_host/phantom_camera_host.gd" id="6_fbgqt"]
-[ext_resource type="Texture2D" uid="uid://cnb5tpl7qdpuj" path="res://2D/Placeholders/Image Frames Animation/new_project_export_Image Frames Animation_01.png" id="8_cja0u"]
-[ext_resource type="Texture2D" uid="uid://bgq0sk5qs447o" path="res://2D/Placeholders/Image Frames Animation/new_project_export_Image Frames Animation_02.png" id="9_uj6j0"]
-[ext_resource type="Texture2D" uid="uid://b283quj0lekv4" path="res://2D/Placeholders/Image Frames Animation/new_project_export_Image Frames Animation_03.png" id="10_ftmse"]
-[ext_resource type="Texture2D" uid="uid://742wo1er0lnw" path="res://2D/Placeholders/Image Frames Animation/new_project_export_Image Frames Animation_04.png" id="11_8ywd8"]
-[ext_resource type="Texture2D" uid="uid://7dx66stdfyhm" path="res://2D/Placeholders/Image Frames Animation/new_project_export_Image Frames Animation_05.png" id="12_fsaqe"]
-[ext_resource type="Texture2D" uid="uid://b0s748ack0rb5" path="res://2D/Placeholders/Image Frames Animation/new_project_export_Image Frames Animation_06.png" id="13_1ptc3"]
-[ext_resource type="Texture2D" uid="uid://ctofrqyrgkbrl" path="res://2D/Placeholders/Image Frames Animation/new_project_export_Image Frames Animation_07.png" id="14_7yo28"]
-[ext_resource type="Texture2D" uid="uid://bxm82cst3dpt2" path="res://2D/Placeholders/Image Frames Animation/new_project_export_Image Frames Animation_08.png" id="15_stj0l"]
-[ext_resource type="Texture2D" uid="uid://odpj1c4u60ct" path="res://2D/Placeholders/Image Frames Animation/new_project_export_Image Frames Animation_09.png" id="16_7qc4n"]
-[ext_resource type="Texture2D" uid="uid://bqmrxfp58jyiy" path="res://2D/Placeholders/Image Frames Animation/new_project_export_Image Frames Animation_10.png" id="17_k3fkn"]
-[ext_resource type="Texture2D" uid="uid://c3nvlqjhua5at" path="res://2D/Placeholders/Image Frames Animation/new_project_export_Image Frames Animation_11.png" id="18_6r16x"]
-[ext_resource type="Texture2D" uid="uid://bdorhpik4g70m" path="res://2D/Placeholders/Image Frames Animation/new_project_export_Image Frames Animation_12.png" id="19_cnvwo"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_4ia1p"]
 sky_horizon_color = Color(0.64625, 0.65575, 0.67075, 1)
@@ -49,50 +37,6 @@ cull_mask = 1048575
 h_offset = 0.0
 v_offset = 0.0
 fov = 50.0
-
-[sub_resource type="SpriteFrames" id="SpriteFrames_72wgc"]
-animations = [{
-"frames": [{
-"duration": 1.0,
-"texture": ExtResource("8_cja0u")
-}, {
-"duration": 1.0,
-"texture": ExtResource("9_uj6j0")
-}, {
-"duration": 1.0,
-"texture": ExtResource("10_ftmse")
-}, {
-"duration": 1.0,
-"texture": ExtResource("11_8ywd8")
-}, {
-"duration": 1.0,
-"texture": ExtResource("12_fsaqe")
-}, {
-"duration": 1.0,
-"texture": ExtResource("13_1ptc3")
-}, {
-"duration": 1.0,
-"texture": ExtResource("14_7yo28")
-}, {
-"duration": 1.0,
-"texture": ExtResource("15_stj0l")
-}, {
-"duration": 1.0,
-"texture": ExtResource("16_7qc4n")
-}, {
-"duration": 1.0,
-"texture": ExtResource("17_k3fkn")
-}, {
-"duration": 1.0,
-"texture": ExtResource("18_6r16x")
-}, {
-"duration": 1.0,
-"texture": ExtResource("19_cnvwo")
-}],
-"loop": true,
-"name": &"mai",
-"speed": 5.0
-}]
 
 [node name="Battle" type="Node3D"]
 
@@ -186,9 +130,3 @@ fov = 50.0
 
 [node name="PhantomCameraHost" type="Node" parent="Camera3D"]
 script = ExtResource("6_fbgqt")
-
-[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
-position = Vector2(86, 132)
-sprite_frames = SubResource("SpriteFrames_72wgc")
-animation = &"mai"
-autoplay = "mai"
