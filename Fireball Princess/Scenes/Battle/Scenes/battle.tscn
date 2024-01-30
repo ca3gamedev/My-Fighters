@@ -1,6 +1,7 @@
-[gd_scene load_steps=13 format=3 uid="uid://cxafx6q1ohpok"]
+[gd_scene load_steps=14 format=3 uid="uid://cxafx6q1ohpok"]
 
 [ext_resource type="PackedScene" uid="uid://dm4ascb587t0" path="res://Scenes/Characters/Placeholder/Fiona.tscn" id="1_h3mgn"]
+[ext_resource type="Texture2D" uid="uid://dot3ru2s7j1x1" path="res://2D/Skybolx/BlueSkySkybox.png" id="1_wpwth"]
 [ext_resource type="PackedScene" uid="uid://dm2hrrlme3o7n" path="res://Scenes/Characters/Placeholder/FionaAI.tscn" id="2_rh822"]
 [ext_resource type="PackedScene" uid="uid://chua1sh6nwjbx" path="res://Scenes/Battle/Levels/stairs_to_heaven.tscn" id="2_xdpcc"]
 [ext_resource type="Script" path="res://Scenes/Battle/Camera/Middle.gd" id="4_pq6nx"]
@@ -8,21 +9,23 @@
 [ext_resource type="Script" path="res://addons/phantom_camera/scripts/resources/camera_3D_resource.gd" id="6_dv2r2"]
 [ext_resource type="Script" path="res://addons/phantom_camera/scripts/phantom_camera_host/phantom_camera_host.gd" id="6_fbgqt"]
 
-[sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_4ia1p"]
-sky_horizon_color = Color(0.64625, 0.65575, 0.67075, 1)
-ground_horizon_color = Color(0.64625, 0.65575, 0.67075, 1)
+[sub_resource type="PanoramaSkyMaterial" id="PanoramaSkyMaterial_f3xqw"]
+panorama = ExtResource("1_wpwth")
 
 [sub_resource type="Sky" id="Sky_xnemn"]
-sky_material = SubResource("ProceduralSkyMaterial_4ia1p")
+sky_material = SubResource("PanoramaSkyMaterial_f3xqw")
 
 [sub_resource type="Environment" id="Environment_abmom"]
 background_mode = 2
+background_energy_multiplier = 0.7
 sky = SubResource("Sky_xnemn")
+sky_rotation = Vector3(0, -0.685914, 0)
 tonemap_mode = 3
 tonemap_exposure = 1.1
 glow_enabled = true
-fog_enabled = true
-fog_density = 0.001
+fog_density = 0.0001
+volumetric_fog_enabled = true
+volumetric_fog_density = 0.01
 adjustment_enabled = true
 adjustment_brightness = 1.1
 adjustment_contrast = 0.9
@@ -58,7 +61,7 @@ light_color = Color(0.376471, 0.176471, 0.772549, 1)
 light_energy = 0.5
 
 [node name="Stairs to Heaven" parent="." groups=["GROUND"] instance=ExtResource("2_xdpcc")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -3.37947)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.00702286, 0, -3.37947)
 
 [node name="FionaAI" parent="." node_paths=PackedStringArray("Oponent") instance=ExtResource("2_rh822")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.0508, 0, 0)

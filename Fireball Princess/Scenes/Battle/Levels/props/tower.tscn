@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3 uid="uid://ci20alrhvsqqk"]
+
+[ext_resource type="PackedScene" uid="uid://doi1d3bwcvp5g" path="res://3D/Levels/Stairs to Heaven/tower.glb" id="1_0408w"]
+
+[node name="tower" instance=ExtResource("1_0408w")]
+transform = Transform3D(0.5, 0, 0, 0, 0.3, 0, 0, 0, 0.5, 0, 0, 0)
