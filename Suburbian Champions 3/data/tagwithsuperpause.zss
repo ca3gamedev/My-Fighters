@@ -1,0 +1,1331 @@
+# ===============================================================================
+# This is a modified version by Orochi_Kyo of the default tag.zss for Ikemen Go that includes two assist movements, normal and super assist.
+# Also includes Swith on hyper movement.
+# It is highly untested and pretty much in an beta state, so use on your own risk, please do not report any bug on the tag system to Ikemen
+# Go devs while using this file.
+# 
+# To work with this be sure your chars are using state [normalAttacksStartStateno,normalAttacksEndStateno] for normals, [specialAttacksStartStateno,specialAttacksEndStateno]  
+# for special attacks, [superAttacksStartStateno,superAttacksEndStateno] for Supers and Hypers(Check the common.const file for the numeric values) 
+# for hitstates [5000,5120] and for die state 5150, any difference from these state will break compatibility.
+# 
+# Now to set your assist and super assist stateno you should declare this way in your char main CNS file
+# 	[Constants]
+#	StateTagAssistSuper = 1010 (number of the stateno for the assist)
+#	StateTagAssistHyper = 1600 (number of the stateno for the Hyper assist)
+#	tauntWhileWaitingForPartners = 195 (number of the state used to taunt the character in Triple Menace)
+#	switchAttack = 640 (the animation used for the Normal switch Attack, if you are using mvc1switch = 1)
+#		
+# This file should be used alongside a common.cmd and common.const that have all the stuff needed to make this work.
+# Thanks to K4thos, Gacel and the whole Ikemen community for supporting this great engine, ENJOY!!
+
+#===============================================================================	
+# First patch
+# A new cooldown variable was set to determine how often you can switch/use Assist/Switch, look for it on common.const TagAssistCooldown
+# A delay to partner entering on screen was added when the active char on screen is beaten.
+# You can call Assist while on air.
+# Fixed the active turning if it is located between main active opponent and partner opponent.
+
+#===============================================================================
+# Patch 21/Sept/2020
+# Added a new function to hide Partners helpers and explods while they are tagged out.Look for const(HidePartnerHelpersExplods) in common.const
+# Added a new assertspecial to taggedout partners, so they do not stay on screen after performing the assist, useful for AI controlled teams. 
+# Added Gacel fix for autoturn.
+# Added Numenemy to avoid flood in debug messages.
+# Score.zss is used because statedef -4, if you customized your score.zss take the last lines of code the score.zss included in this zip and
+# copy them to your own score.zss -- Deprecated
+
+#===============================================================================
+# Patch 17/Jan/2021
+# Updated to Ikemen Go 0.96.1
+# Added Triple Menace(This was fucking hard to do, lots of code added and changed, despite it looks dummy on the screen)
+# Moved code from score.zss to the main tag zss file.
+# Fix bug with character in assist and super assist leaving the screen inmediately if main char hits a Super Special movement. 
+# Added new constant variable in common.const called tauntWhileWaitingForPartners. A long ass name. Used for Triple Menace.
+# More Map reset conditions, just in case normal conditions for map resetting are not met.
+# Characters are not able to receive hits when leaving the stage.
+
+#===============================================================================
+# Patch 01/Nov/2021
+# updated to work with Ikemen Go 0.97
+# Added MVC Switch style, you can turn return to default switch by setting "mvc1switch = 1" to "mvc1switch = 0" in the common.const
+# Fix bug, no more control over assisting characters.
+# Added new constant switchAttack = 640, declare this on the Char's main cns file to set up the animation used for switch attack.
+# Added these constants for chars that does not use the standard numeration for normal(200,499), specials(1000,1999) and super states(2000,3999)
+# normalAttacksStartStateno = 200
+# normalAttacksEndStateno = 499
+# airAttacksStartStateno = 600
+# airAttacksEndStateno = 699
+# specialAttacksStartStateno = 1000
+# specialAttacksEndStateno = 1999
+# superAttacksStartStateno = 2000
+# superAttacksEndStateno = 3999
+# Moved all the states 5600 - 5700 to 56000 and 57000 to avoid stateno conflicts with many characters.
+# Added air switch, it will be turned off by default, press any Switch button while doing combo on air.
+# Fixed triple Menace.
+# Every feature can be turned ON/OFF in the common.const.
+# Added Marvel Vs Capcom 1 Variable Cross.
+
+#===============================================================================
+# Patch 14/Feb/2022 HAPPY VALENTINE!!
+# You can turn off/on super pauses on switch on air and switch on combo
+# superpauseForComboSwitch / superpauseForAirSwitch. Both enabled by default.
+# 
+# New constants for explods and sounds for TAG, check " Explods for Orochi Kyo TAG " in the common.const file
+# 
+# Many bug fixes. Thanks to beta testers to report stuff.
+# 
+# Added fallOnMVC1Switch constant. If "0" opponent won't fall if switch attacks hits. 
+# Added tauntAfterMVC1Switch constant. If "0" the character won't taunt after switching.
+# Added reverseSnapBack. If "1" snapback on hit will switch your characters while opponent remains on stage. Like Kof 2003.
+
+#===============================================================================
+# Patch 17/March/2022
+# Tested on Ikemen Go 0.98.2
+# Changed the size of the text for Assist OK and debug mode. OpenSans is now the default debug font for Ikemen Go.
+# Changed the way projectiles are detected for combo switch. It still does not work with Helper projectiles.
+# You can locate easily the constants used by the tag inside the common.const.
+#;-----------------------------------------------------------------------------------------
+#; ###################### constants for OROCHI KYO TAG  #############################
+#;-----------------------------------------------------------------------------------------
+
+#===============================================================================
+# Patch 13/April/2022
+# Fixed many bugs introduced in the last version, including character getting control while taunting after Tag Switch.
+# Entering character can be hit. This is for MVC1 switch on.
+# 
+#===============================================================================
+# Patch 02/May/2022
+# Added new constant superSwitch, to turn on/off Super Switch feature.
+# 
+#===============================================================================
+# Patch 31/May/2022
+# Added three new constants
+# assistCallWhileGuarding; call assist or super assist while guarding, turned off by default.
+# instaSwitch; The team leader will leave the screen immediately instead of waiting to finish the movement, turned off by default.
+# showPartnersAtIntro; show or hide partners at intro. Highly experimental, turned on by default.
+# --------------------------------------------------------------
+# About instaswitch, helpers can remain on screen because of sudden changestate applied to the character. Use "teamleader != playerno" 
+# in your removeexplod, stopsnd and destroyself SCTRLS if you see are experiencing this behavior
+# --------------------------------------------------------------
+# Now debug info will remain off/on when you change character(Training mode only).
+# Debug info works better with 16:9 resolutions.
+# New Debug info font: Jam Small! Please install it in your fight.def as font number 9
+# font9 = font/Jam_Small.def
+# Credit to the creator, Cola Gold for such an amazing and clear font.
+# --------------------------------------------------------------
+# Added a loop for MVC1 switch attack, if the player already ended the animation attack but is still not in ground, the animation
+# will loop again.
+#===============================================================================
+# Patch 16/Nov/2022
+# New Constant
+# onlyOneAssistPerTurn; set to 1 if you want only one assist attack at the same time. Does not work with super assist.
+# Bug Fix: AI cannot swith on Air anymore.
+# Bug Fix: Characters with different cooldown times does not break the tag anymore.
+# Bug Fix: The enemyteam will NOT stay without teamleader anymore, if you hit the teamleader while a partner is assisting.
+
+#===============================================================================
+# Known Problems
+# Do not use for assist and hyper assist, grab movements or movements that have custom hit states. For example p2stateno, targetstate, targetbind 
+# When a partner hit the opponent with an Assist or Hyperassist while it is on a custom hit state, this will cause unexpected behavior.
+# Chars with custom power bars and power values also causes troubles.
+# The Turning system is still not perfect, sometimes the player turns on the Assist char yet.
+# I have identified the conditions that could lead the player not turning on the main player, the fix involves to edit Ikemen Go turn system
+# which is something I dont want to mess with for now...
+
+#===============================================================================
+# What is coming up?
+# More bug fixing if needed.
+
+#===============================================================================
+#Switch Attack MVC2
+#===============================================================================
+[Statedef 56900; type: A; movetype: A; physics: N;  anim: Const(switchAttack); sprpriority: 2; ctrl: 0; juggle:0;]
+
+if BackEdgeBodyDist <= 10 { NotHitBy{value: SCA; time: 1} }				
+
+if time = 0 && map(variableCrossIsOn) = 0 && const(fallOnMVC1Switch) = 0 {
+	text{removetime:60; layerno:1; pos:map(posXtext),map(posYtext)+40; scale:0.5,0.5; text:"CHANGE"; font:F9;}
+	HitDef{
+		attr: S, NA;
+		animtype: heavy;
+		damage: 26;
+		hitflag: MAFD;
+		guardflag: MA;
+		pausetime: 12, 12;
+		sparkno: 0;
+		sparkxy: -10, -37;
+		hitsound: 5, 1;
+		guardsound: 6, 0;
+		dizzypoints: 0;
+		guardpoints: 0;
+		ground.type: Low;
+		ground.slidetime: 20;
+		ground.hittime: 25;
+		fall:0;
+		air.fall:1;
+		fall.recover: 0;
+		ground.velocity: -1.5/localscale, 0;
+		air.velocity: -1.5/localscale, -10/localscale;
+	}
+}
+
+if time = 0 && map(variableCrossIsOn) = 0 && const(fallOnMVC1Switch) = 1 {
+	text{removetime:60; layerno:1; pos:map(posXtext),map(posYtext)+40; scale:0.5,0.5; text:"CHANGE";font:F9;}
+	HitDef{
+		attr: S, NA;
+		animtype: heavy;
+		damage: 26;
+		hitflag: MAFD;
+		guardflag: MA;
+		pausetime: 12, 12;
+		sparkno: 0;
+		sparkxy: -10, -37;
+		hitsound: 5, 1;
+		guardsound: 6, 0;
+		dizzypoints: 0;
+		guardpoints: 0;
+		ground.type: Low;
+		ground.slidetime: 10;
+		ground.hittime: 10;
+		fall:1;
+		fall.recover: 0;
+		ground.velocity: -1.5/localscale, -13/localscale;
+		air.velocity: -1.5/localscale, -10/localscale;
+	}
+}
+
+if time = 0 && map(variableCrossIsOn) = 1 {
+	text{removetime:60; layerno:1; pos:map(posXtext),map(posYtext)+40; scale:1,1; text:"Variable Cross";font:F9;}
+	HitDef{
+		attr: S, NA;
+		animtype: heavy;
+		damage: 26;
+		hitflag: MAF;
+		guardflag: MA;
+		pausetime: 12, 12;
+		sparkno: 0;
+		sparkxy: -10, -37;
+		hitsound: 5, 1;
+		guardsound: 6, 0;
+		dizzypoints: 0;
+		guardpoints: 0;
+		ground.type: Low;
+		ground.slidetime: 10;
+		ground.hittime: 10;
+		fall:1;
+		fall.recover: 0;
+		ground.velocity: 4.5/localscale, -8/localscale;
+		air.velocity: 4.5/localscale, -8/localscale;
+	}
+}
+
+if pos y <=  0 && animtime = 0{
+	changeanim{value:Const(switchAttack);}
+}
+
+if pos y >=  0 {
+	 posset{y:0}
+	 velset{x:0; y:0}
+	 ChangeState{value: 56950; ctrl: 0}
+}
+
+#===============================================================================
+# Air attack Switch MVC2
+#===============================================================================
+[Statedef 56910; type: A; movetype: A; physics: A;  anim: Const(switchAirAttack); sprpriority: 2; ctrl: 0; juggle:0; poweradd: -1000;]
+
+NotHitBy{value: SCA; time: 5}	
+
+if movehit {
+	mapset{map:"airSwitchHit";value:25;}
+}	
+
+persistent(0) if roundState != 0 {
+	playSnd{value: Fconst(soundEffectForAirSwitch1),const(soundEffectForAirSwitch2); channel: 4}
+	if const(superpauseForAirSwitch) = 1 {
+	persistent(0) {superpause{time:20; movetime:0; anim:fconst(animationForAirSwitch)}}
+	} else {
+	explod{anim: fconst(animationForAirSwitch);	postype: p1; pos: 0, 0; velocity: 0, -7; accel: 0, .32; removetime: 48; }
+	 }
+	 text{removetime:60; layerno:1; pos:map(posXtext),map(posYtext)+40; scale:0.5,0.5; text:"AIR SWITCH";font:F9;}
+}
+
+
+if animtime = 0 {AssertSpecial{flag: animfreeze;}}
+
+ignorehitpause if time = 0 {
+	HitDef{
+		attr: S, NA;
+		animtype: heavy;
+		damage: 0;
+		hitflag: MAF;
+		guardflag: MA;
+		pausetime: 12, 12;
+		sparkno: 0;
+		sparkxy: -10, -37;
+		hitsound: const(soundHitForAirSwitch1),const(soundHitForAirSwitch2);
+		guardsound: 6, 0;
+		dizzypoints: 0;
+		guardpoints: 0;
+		ground.type: Low;
+		ground.slidetime: 10;
+		ground.hittime: 10;
+		fall:1;
+		kill:0;
+		fall.recover: 0;
+		p2stateno:54400; 
+		ground.velocity: -1.5/localscale, -13/localscale;
+		air.velocity: -1.5/localscale, -10/localscale;
+	}
+}
+
+
+#===============================================================================
+# taunt after switching; just for mvc1switch
+#===============================================================================
+[Statedef 56950; type: S; movetype: I; physics: S;  anim: const(tauntWhileWaitingForPartners); sprpriority: 2; ctrl: 0; juggle:0;]
+
+persistent(0) if map(variableCross) && roundstate = 2 && teamleader = playerno {
+	playSnd{value: Fconst(soundEffectForVariableCross1),const(soundEffectForVariableCross2); channel: 4}
+
+	explod{
+		anim: fconst(animationForVariableCross);
+		postype: p1;
+		pos: 0, 0;
+		velocity: 0, -7;
+		accel: 0, .32;
+		removetime: 48;
+	}
+	
+	explod{
+		anim: fconst(backgroundForVariableCross);
+		postype: left;
+		pos: 0, 0;
+		scale: .6, .6;
+		velocity: 0, 0;
+		accel: 0, 0;
+		sprpriority: -3;
+		removetime: const(variableCrossTime);
+	}
+}
+
+
+if time = 30 && map(tripleMenace) = 0 && (const(tauntAfterMVC1Switch) || map(variableCross)) {
+	 Ctrlset{value: 1;}
+	  if Standby {
+        TagIn{}
+    }
+}
+
+if time > 1 && map(tripleMenace) = 0 && !const(tauntAfterMVC1Switch) && map(variableCross) = 0 {
+	  if Standby {
+        TagIn{}
+    }
+    ChangeState{value: Const(StateStand); ctrl: 1}
+}			
+
+if animtime = 0 {
+	if Standby {
+        TagIn{}
+    }
+ ChangeState{value: Const(StateStand); ctrl: 1}
+}
+
+#===============================================================================
+#Snapback or Forced Switch
+#===============================================================================
+[Statedef 56960; type: S; movetype: A; physics: N;  anim: Const(snapBackAttack); sprpriority: 2; ctrl: 0; juggle:0; poweradd :-1000;]
+
+NotHitBy{value: SCA; time: 2}				
+
+persistent(0) if roundState != 0 {
+	playSnd{value: Fconst(soundEffectForSnapback1),const(soundEffectForSnapback2); channel: 4}
+	superpause{time:20; movetime:0; anim:fconst(animationForSnapback)}
+	text{removetime:60; layerno:1; pos:map(posXtext),map(posYtext)+40; scale:0.5,0.5; text:"Snapback";font:F9;}
+}
+
+if const(reverseSnapBack) = 1  {
+	if time < 5 {VelSet{x: 3; y: 0}}
+	if time = [5,10] {VelSet{x: 2; y: 0}}
+	if time = [10,15] {VelSet{x: 1; y: 0}}
+	if time > 15 {VelSet{x: 0; y: 0}}
+}
+
+if time = 0 && movehit = 0 && enemynear,map(ASSISTINPROCESS)=0 && enemynear,teammode = tag && enemynear,map(partnersAlive) > 0 && enemynear,ID = enemynear,Map(_iksys_tagCurrentID) && enemynear,stateno != 56970 && enemynear,map(gotSnaped) = 0 && const(reverseSnapBack) = 0 {
+
+	HitDef {
+		attr: S, NA;
+		animtype: heavy;
+		damage: 50;
+		hitflag: MAF;
+		guardflag: MA;
+		pausetime: 12, 12;
+		sparkno: 0;
+		sparkxy: -10, -37;
+		hitsound: const(soundHitForSnapback1),const(soundHitForSnapback2);
+		guardsound: 6, 0;
+		dizzypoints: 0;
+		guardpoints: 0;
+		ground.type: Low;
+		ground.slidetime: 10;
+		ground.hittime: 10;
+		fall:1;
+		kill:0;
+		fall.recover: 0;
+		p2stateno:56970;
+		ground.velocity: -13/localscale, -3/localscale;
+		air.velocity: -13/localscale, -3/localscale;
+	}
+}
+
+if time = 0 && movehit = 0 && enemynear,map(ASSISTINPROCESS)=0  && teammode = tag && map(partnersAlive) > 0 && ID = Map(_iksys_tagCurrentID) && stateno != 56970 && map(gotSnaped) = 0 && const(reverseSnapBack) = 1 {
+
+	HitDef {
+		attr: S, NA;
+		animtype: heavy;
+		damage: 0;
+		hitflag: MAF;
+		guardflag: MA;
+		pausetime: 12, 12;
+		sparkno: 0;
+		sparkxy: -10, -37;
+		hitsound: const(soundHitForSnapback1),const(soundHitForSnapback2);
+		guardsound: 6, 0;
+		dizzypoints: 0;
+		guardpoints: 0;
+		ground.type: Low;
+		ground.slidetime: 22;
+		ground.hittime: 22;
+		fall:0;
+		air.fall:1;
+		kill:0;
+		fall.recover: 0;
+		p1stateno:56970;
+		ground.velocity: -3/localscale,  0;
+		air.velocity: -1.5/localscale, -9/localscale;
+	}
+}
+
+if (enemynear,map(partnersAlive) = 0 || enemynear,map(ASSISTINPROCESS)>0) && time = 0 && movehit = 0 && ((enemynear,teammode != tag) || (enemynear,ID = enemynear,Map(_iksys_tagCurrentID) && enemynear,teammode = tag)) {
+	HitDef{
+		attr: S, NA;
+		animtype: heavy;
+		damage: 50;
+		hitflag: MAF;
+		guardflag: MA;
+		pausetime: 12, 12;
+		sparkno: 0;
+		sparkxy: -10, -37;
+		hitsound: 5, 1;
+		guardsound: 6, 0;
+		dizzypoints: 0;
+		guardpoints: 0;
+		ground.type: Low;
+		ground.slidetime: 10;
+		ground.hittime: 10;
+		fall:1;
+		kill:0;
+		fall.recover: 0;
+		ground.velocity: -13/localscale, -3/localscale;
+		air.velocity: -13/localscale, -3/localscale;
+	}
+}
+
+
+ignorehitpause if movehit || enemynear,stateno = 56971 {
+	MoveHitReset{} 
+}
+
+ignorehitpause if animtime = 0 {
+	 ChangeState{value: 0; ctrl: 1}
+}
+
+#===============================================================================
+#After receiving snapback hit
+#===============================================================================
+[Statedef 56970; type: A; movetype: H; physics: A;  anim: Const(snapBackHit); sprpriority: 2; ctrl: 0; juggle:0;]
+
+if time = 0 {selfstate {value:56971;ctrl:0} }
+
+#===============================================================================
+#After receiving snapback hit Self State
+#===============================================================================
+[Statedef 56971; type: A; movetype: H; physics: A;  anim: Const(snapBackHit); sprpriority: 2; ctrl: 0; juggle:0;]
+
+persistent(0) {
+	NotHitBy{value: SCA; time: 2}			
+	ignorehitpause if const(reverseSnapBack) = 1 {mapset{map:"gotSnaped";value:1;}}
+	}
+
+if map(partnerIsReady) && time = 1 {
+	teammapadd{map:"partnerIsReady";value:-1}
+}
+
+Velset{x:-12/localscale; y:-1/localscale}
+
+if map(COOLDOWN) > 0 {
+	mapset{map:"COOLDOWN";value:0}
+}
+
+if !Standby {
+	TagOut{}
+}
+
+if BackEdgeDist < -Const240p(480) || FrontEdgeDist < -Const240p(480) { 
+	persistent(0) {
+	if const(reverseSnapBack) = 0 {mapset{map:"gotSnaped";value:1;}}
+		#;Turn{}
+	}
+	selfState{value: Const(StateTagWaitingOutside)}
+}
+
+
+persistent(0) if map(reverseSnapbackIsOn) {
+	ChangeState{value: Const(StateTagLeavingScreen); ctrl: 0} 
+}
+
+
+#===============================================================================
+#StateTagEnteringScreen
+#===============================================================================
+[Statedef 56000; type: S; movetype: I; physics: S; anim: Const(AnimRunFwdOrHopForward); sprpriority: 2; ctrl: 0;]
+
+if map(partnerIsReady) && time = 1 {
+	teammapadd{map:"partnerIsReady";value:-1}
+}
+
+persistent(0) if time = 0 {
+
+mapset{map:"localScaleMultiplier"; value:(1/localscale)}
+
+mapset{map:"localScaleYSpeed"; value:(1/localscale)}
+
+mapset{map:"ySpeedVsScreen"; value:3*map(localScaleYSpeed)}
+
+}
+
+#; here the super pause called during superswitch, use it to call your own sounds or backgrounds
+persistent(0) if map(SUPERSWITCH) = 1 {
+teammapset{map:"justSuperSwitched";value:const(superSwitchCooldown)}
+text{removetime:60; layerno:1; pos:map(posXtext),map(posYtext)+30; scale:0.5,0.5; text:"SUPER SWITCH";font:F9;}
+superpause{time:28;movetime:28;anim:-1}
+}
+
+if map(SWITCH) = 1 {
+	if map(switchOnCombo) && const(superpauseForComboSwitch) {	
+		superpause{time:20; movetime:20; anim:-1}
+		text{removetime:60; layerno:1; pos:map(posXtext),map(posYtext)+30; scale:0.5,0.5; text:"Switch on Combo";font:F9;}
+	}
+	NotHitBy{value: SCA; time: 2}				
+}
+
+if Time = 0 &&  const(mvc1switch) = 0 && map(variableCrossIsOn) = 0 {
+	PosSet{x: -Const240p(243) * Facing; y: 0}
+}
+
+if Time = 0 && ((const(mvc1switch) = 1 && map(SWITCH) = 1) || map(variableCrossIsOn) = 1) {
+PosSet{x: (((-screenwidth+const(width))/2)*1.5)*facing; y: (const(initialPosXforSwitch)+((enemynear,frontedgebodydist*map(localScaleMultiplier))*-0.05))*map(localScaleMultiplier)}
+statetypeset{statetype:A; physics:N;}
+}
+
+if Time = 0 &&  const(mvc1switch) = 1 && map(SWITCH) = 0 && map(variableCrossIsOn) = 0 {
+	PosSet{x: (-140 * Facing)/localscale; y: 0}
+}
+
+if BackEdgeBodyDist >= 0 {
+
+   if Standby {
+        TagIn{leader:playerID(Map(_iksys_tagCurrentID)),playerno}
+    }
+    
+    if ((map(variableCrossIsOn) = 1) || (const(mvc1switch) = 1 && map(SWITCH) = 1)) { 
+    	if anim != const(switchAttack){changestate{value:56900;}}
+    }
+       
+    if (const(mvciActiveSwitch) = 0 && ((BackEdgeDist * LocalScale >= Map(_iksys_tagSwitchDist) || P2BodyDist X < Const240p(30/localscale)) && pos y >= 0)) ||
+       ((const(mvciActiveSwitch) = 1 && (P2BodyDist X < Const240p(30/localscale)) && pos y >= 0)) 		
+     {
+        VelSet{x: 0; y: 0}
+         if map(ASSISTTYPE) = [1,2] {
+		        if map(COOLDOWN) > 0 {
+					mapset{map:"COOLDOWN";value:0}
+				}
+         	  text{removetime:60; layerno:1; pos:map(posXtext),map(posYtext)+40; scale:0.5,0.5; text:"Assist Attack";font:F9;}
+              ChangeState{value: map(ASSISTMOVE); ctrl: 0}
+        	}
+       	 if const(mvciActiveSwitch) = 0 && (map(SUPERSWITCH) = 1 || map(tripleMenace) = 1) {
+       		#ADD here any FX you want when a Hyper Switch is happening
+       		ChangeState{value: Const(StateTagAssistHyper); ctrl: 0}
+            } 
+         if map(SWITCH) = 1 || (const(mvciActiveSwitch) = 1 && map(SUPERSWITCH) = 1) {
+         	text{removetime:60; layerno:1; pos:map(posXtext),map(posYtext)+40; scale:0.5,0.5; text:"CHANGE";font:F9;}
+         	mapset{map:"SWITCH";value:0}            
+            ChangeState{value: Const(StateStand); ctrl: 1}
+            }   
+        }
+  }
+
+if const(mvc1switch) = 0 {
+persistent(0) if roundstate = 2{playSnd{value: Fconst(soundEffectForRunning1),const(soundEffectForRunning2); channel: 4}}
+VelSet{x: ceil(Const240p(const(switchAttackXSpeed))+(p2bodydist x*0.01))/localscale; y: 0}
+}
+
+if pos y < 0 {mapset{map:"localVelY";value:map(ySpeedVsScreen)}} else {mapset{map:"localVelY";value:0}}
+
+if const(mvc1switch) = 1 && (map(SWITCH) = 0) && pos y <= 0 {
+	persistent(0) if roundstate = 2{playSnd{value: Fconst(soundEffectForRunning1),const(soundEffectForRunning2); channel: 4}}
+	VelSet{x: ceil(Const240p(const(switchAttackXSpeed))/localscale); y: map(localVelY)}
+}
+
+if (const(mvc1switch) = 1 && (map(tauntTimeForSwitch) = [20,30] || map(reverseSnapbackIsOn)) && (map(SWITCH)) || map(variableCrossIsOn) = 1) {
+	VelSet{x: ceil(Const240p(const(switchAttackXSpeed))+(p2bodydist x*0.01))/localscale; y: map(localVelY)}
+	TeamMapSet{map:"reverseSnapbackIsOn"; value:0}
+}
+
+#===============================================================================
+#StateTagEnteringScreenaftermaincharwasbeat
+#===============================================================================
+[Statedef 56250; type: S; movetype: I; physics: S; anim: Const(AnimRunFwdOrHopForward); sprpriority: 2; ctrl: 0;]
+
+if Time = 0 {
+	PosSet{x: -Const240p(243) * Facing; y: 0}
+}
+
+if map(partnerIsReady) && time = 1 {
+	teammapadd{map:"partnerIsReady";value:-1}
+}
+
+NotHitBy{value: SCA; time: 2}
+
+if BackEdgeBodyDist >= 0 {
+	teammapset{map:"airSwitchCalled"; value:0;}
+    if BackEdgeDist * LocalScale >= Map(_iksys_tagSwitchDist) || P2BodyDist X < Const240p(30) {
+        VelSet{x: 0; y: 0}
+            if Standby {TagIn{leader:playerID(Map(_iksys_tagCurrentID)),playerno}}
+        ChangeState{value: Const(StateStand); ctrl: 1} 
+    }
+}
+
+VelSet{x: Const240p(10); y: 0}
+
+#===============================================================================
+#StateTagLeavingScreen
+#===============================================================================
+[Statedef 56100; type: S; movetype: I; physics: N; anim: Const(AnimRunFwdOrHopForward); sprpriority: -2; velset: 0, 0; ctrl: 0; facep2: 1;]
+
+if map(COOLDOWN) > 0 {
+	mapset{map:"COOLDOWN";value:0}
+}
+
+NotHitBy{value: SCA; time: 2}
+
+persistent(0) {
+	Turn{}
+}
+
+if !Standby {
+	TagOut{}
+}
+
+VelSet{x: Const240p(15); y: 0}
+
+if time > const(TagAssistCooldown)/2 {
+	ChangeState{value: Const(StateTagWaitingOutside)}
+}
+
+#===============================================================================
+#StateTagWaitingOutside
+#===============================================================================
+[Statedef 56110; type: A; movetype: I; physics: N; anim: Const(AnimStanding); velset: 0, 0; ctrl: 0;]
+
+if teamside = 1 {
+mapset{map:"posXtext";value:screenwidth-(screenwidth-(10/localscale));}
+}
+
+if teamside = 2 {
+mapset{map:"posXtext";value:screenwidth-(60/localscale);}
+}
+
+if playerno = 1 || playerno = 2 {
+	mapset{map:"posYtext";value:65;}
+}
+
+if playerno = 3 || playerno = 4{
+	mapset{map:"posYtext";value:75;}
+}
+
+if playerno = 5 || playerno = 6 {
+	mapset{map:"posYtext";value:85;}
+}
+
+if playerno = 7 || playerno = 8 {
+	mapset{map:"posYtext";value:95;}
+}
+
+if map(COOLDOWN) < const(TagAssistCooldown) {
+	mapadd{map:"COOLDOWN";value:1}
+	text{removetime:1; text:"Cooldown %v"; layerno:1; pos:map(posXtext),map(posYtext); scale:0.4,0.4; params:map(COOLDOWN);font:F9;}
+}
+
+#;if map(COOLDOWN) = 1 && map(partnerIsReady){
+#;	teammapadd{map:"partnerIsReady";value:-1}
+#;	}
+
+if map(COOLDOWN) = const(TagAssistCooldown) {
+		text{removetime:1; text:"Assist OK"; layerno:1; pos:map(posXtext),map(posYtext); scale:0.4,0.4;font:F9;}
+	if time=const(TagAssistCooldown) { 
+		teammapadd{map:"partnerIsReady";value:1}	
+	}
+}
+
+if map(gotSnaped) && time = [3,6] {
+	mapset{map:"gotSnaped";value:0;}
+}
+
+PosSet{x: (((-screenwidth+const(width))/2)*2)*facing; y: 0}
+
+AssertSpecial{flag: invisible; flag2: noautoturn}
+
+if Facing != PlayerID(Map(_iksys_tagCurrentID)),Facing {
+	Turn{}
+}
+
+#===============================================================================
+#StateTagJumpingIn
+#===============================================================================
+[Statedef 56200; type: S; movetype: I; physics: N;
+ anim: Const(AnimJumpForwards_upwards); sprpriority: 2; ctrl: 0;]
+
+screenBound{value: 0; moveCamera: 1, 1}
+
+if AnimElem = 2, < 0 {
+	PosSet{x: -Const240p(243) * Facing; y: 0}
+} else if AnimElem = 2, = 0 {
+	VelSet{x: Const240p(4); y: -Const240p(8.75)}
+} else if AnimElem = 2, >= 0 {
+	Gravity{}
+	if Vel Y >= 0 && Pos Y > 0 {
+		VelSet{x: 0; y: 0}
+		ChangeState{value: Const(StateTagLanding)}
+	}
+}
+
+#===============================================================================
+#StateTagLanding
+#===============================================================================
+[Statedef 56210; type: S; movetype: I; physics: N;
+ anim: Const(AnimJumpLanding); sprpriority: 2; ctrl: 0;]
+
+if Time = 0 {
+	PosSet{y: 0}
+}
+
+if AnimTime >= 0 {
+	TagIn{stateno: Const(StateStand); ctrl: 1}
+}
+
+#===============================================================================
+#Functions
+#===============================================================================
+[Function fTagPartnerRange(currentID) ret]
+if $currentID > GetPlayerID(TeamSide) + NumPartner {
+	let currentID = GetPlayerID(TeamSide);
+} else if $currentID < GetPlayerID(TeamSide) {
+	let currentID = GetPlayerID(TeamSide) + NumPartner;
+}
+let ret = $currentID;
+
+[Function fGetTagPartnerID(currentID, add) ret]
+let currentID = call fTagPartnerRange($currentID + $add);
+if PlayerID($currentID),Alive = 0 {
+	let partnerCnt = 1;
+	if $partnerCnt = Min(NumPartner, 3) {
+		let currentID = 0;
+	} else {
+		let currentID = call fTagPartnerRange($currentID + $add);
+		if PlayerID($currentID),Alive = 0 {
+			let partnerCnt = $partnerCnt + 1;
+			if $partnerCnt = Min(NumPartner, 3) {
+				let currentID = 0;
+			} else {
+				let currentID = call fTagPartnerRange($currentID + $add);
+				if PlayerID($currentID),Alive = 0 {
+					let currentID = 0;
+				}
+			}
+		}
+	}
+}
+let ret = $currentID;
+
+#===============================================================================
+#Global states (executed when in self's state)
+#===============================================================================
+[Statedef -3]
+
+ignorehitpause if !Const(Default.Enable.Tag) || IsHelper {
+	#do nothing, global code disabled locally (or executed by helper)
+} else ignorehitpause if RoundState = 0 && TeamMode = Tag {
+	MapSet{map: "_iksys_tagActive"; value: 1}
+	MapSet{map: "_iksys_tagSwitchDist"; value: 0}
+	if RoundNo = 1 {
+		MapSet{map: "_iksys_tagCurrentID"; value: GetPlayerID(TeamSide)}
+	} else if ID = Map(_iksys_tagCurrentID) {
+		TeamMapSet{map: "_iksys_tagCurrentID"; value: ID}
+	}
+} else ignorehitpause if Map(_iksys_tagActive) = 1 && !ishelper {
+ignorehitpause if RoundState = 4 {
+		MapSet{map: "_iksys_tagActive"; value: 0}
+	} else ignorehitpause if Alive && pausetime = 0 {	
+		ignorehitpause if ID = Map(_iksys_tagCurrentID) {
+			ignorehitpause if ((Ctrl = 1 || map(assistWhileGuarding))
+			|| stateno = [const(normalAttacksStartStateno),const(normalAttacksEndStateno)] 
+			|| stateno = [const(specialAttacksStartStateno),const(superAttacksEndStateno)] 
+			|| map(gotSnaped) || stateno=56910 || map(tauntTimeForSwitch) > 0	
+			&& (((MoveType != H || map(assistWhileGuarding))  && GetHitVar(isbound) = 0) || map(gotSnaped))) 
+			&& stateNo != Const(StateDownedGetHit_gettingUp) && StateNo != [Const(StateAirGetHit_fallRecoveryOnGroundStillFalling), Const(StateAirGetHit_fallRecoveryInAir)] {
+		
+				let partnerID = 0;
+
+		ignorehitpause if ((map(airSwitchHit) > 0 && map(airSwitchCalled) = 1) ||
+		(((command="tagbutton1" && command != "HoldFwd" && command != "HoldBack")) && (map(switchOnCombo) || (stateno=[const(superAttacksStartStateno),const(superAttacksEndStateno)] && power > 999 && const(superSwitch) && !map(justSuperSwitched)))) || 
+		(map(SwitchA) && (ctrl)) ||
+		(map(variableCross) > 0 && map(partnerForVariableCross) = 1) && map(variableCrossIsOn) = 0 ||
+		(map(gotSnaped) && map(ForcedSwitch) = 1)) &&
+		map(ASSISTTYPE) = 0 && map(tripleMenace) = 0 && map(justSwitched) = 0 && !map(assistWhileGuarding) {
+
+		ignorehitpause if (stateno !=[const(superAttacksStartStateno),const(superAttacksEndStateno)] && pos y >= -30 && (ctrl || map(switchOnCombo))) || (map(gotSnaped) && const(reverseSnapBack) > 0) || (map(airSwitchHit)) {teammapset{map:"SWITCH";value:1}}	
+			
+		let partnerID = call fGetTagPartnerID(ID, -1);
+		ignorehitpause if playerID($partnerID),map(COOLDOWN) = PlayerID($partnerID),const(TagAssistCooldown) && map(SWITCH) = 1 && map(tauntTimeForSwitch) = 0  && map(variableCross) = 0 {
+						if map(switchOnCombo) = 0  {		
+								changeanim{value:const(tauntWhileWaitingForPartners)} 
+								ctrlset{value:0}
+								teammapset{map:"tauntTimeForSwitch";value:60}
+							} 
+						if map(switchOnCombo) = 1  {
+								poweradd{value:-1000}
+								teammapset{map:"tauntTimeForSwitch";value:28}
+								teammapset{map:"SWITCH";value:1}
+							}
+						}
+
+			if stateno=[const(superAttacksStartStateno),const(superAttacksEndStateno)] && (movehit = 1 || projhit = 1 || map(customHyperSwitch)) && map(variableCross) = 0 {teammapset{map:"SUPERSWITCH";value:1}}						
+		} else ignorehitpause if ((map(airSwitchHit) > 0  && map(airSwitchCalled) = 2) ||
+		((command="tagbutton2" && (command != "HoldFwd" && command != "HoldBack")) && (map(switchOnCombo) || (stateno=[const(superAttacksStartStateno),const(superAttacksEndStateno)] && power > 999 && const(superSwitch) && !map(justSuperSwitched)))) || 
+		(map(SwitchB) && (ctrl)) ||
+		((map(variableCross) > 0 && map(partnerForVariableCross) = 2) && map(variableCrossIsOn) = 0) ||
+		(map(gotSnaped) && map(ForcedSwitch) = 2)) &&
+		map(ASSISTTYPE) = 0 && map(tripleMenace) = 0 && map(justSwitched) = 0 && !map(assistWhileGuarding) {
+		
+ignorehitpause if (stateno !=[const(superAttacksStartStateno),const(superAttacksEndStateno)] && pos y >= -30 && (ctrl || map(switchOnCombo))) || (map(gotSnaped) && const(reverseSnapBack) > 0) || (map(airSwitchHit)) {teammapset{map:"SWITCH";value:1}}
+		
+		let partnerID = call fGetTagPartnerID(ID, 1);
+		ignorehitpause if playerID($partnerID),map(COOLDOWN) = playerID($partnerID),const(TagAssistCooldown) && map(SWITCH) = 1 && map(tauntTimeForSwitch) = 0 && map(variableCross) = 0 {						
+					if map(switchOnCombo) = 0 {				
+							changeanim{value:const(tauntWhileWaitingForPartners)} 
+							ctrlset{value:0}
+							teammapset{map:"tauntTimeForSwitch";value:60}
+						} 
+					if map(switchOnCombo) = 1  {
+							poweradd{value:-1000}
+							teammapset{map:"tauntTimeForSwitch";value:28}
+							teammapset{map:"SWITCH";value:1}
+						}
+					}
+
+			if stateno=[const(superAttacksStartStateno),const(superAttacksEndStateno)] && (movehit = 1 || projhit = 1 || map(customHyperSwitch)) && map(variableCross) = 0 {teammapset{map:"SUPERSWITCH";value:1}}		
+			
+		} else if map(SuperAssistd) && map(SWITCH) = 0 && !map(assistWhileGuarding) && map(tripleMenace) = 0 && power >= 1000 && map(variableCross) = 0 && map(partner1isSuperAssist) = 0 { 
+			if 	PlayerID(Map(_iksys_tagCurrentID)),stateno !=[const(superAttacksStartStateno),const(superAttacksEndStateno)] {
+				 	
+				 	ignorehitpause if (ctrl || (const(tripleMenaceOnCombo) = 1 && map(switchOnCombo))) && power >= 3000 {teammapset{map:"partner1isSuperAssist";value:10}}
+					teammapset{map:"ASSISTTYPE";value:2}
+					let partnerID = call fGetTagPartnerID(ID, -1);
+				
+					}
+		} else if map(SuperAssistw) && map(SWITCH) = 0 && !map(assistWhileGuarding) && map(tripleMenace) = 0 && power >= 1000 && map(variableCross) = 0 && map(partner2isSuperAssist) = 0 {
+			if 	PlayerID(Map(_iksys_tagCurrentID)),stateno !=[const(superAttacksStartStateno),const(superAttacksEndStateno)] {	 
+					
+					ignorehitpause if (ctrl || (const(tripleMenaceOnCombo) = 1 && map(switchOnCombo))) && power >= 3000 {teammapset{map:"partner2isSuperAssist";value:10}}
+					teammapset{map:"ASSISTTYPE";value:2}					
+					let partnerID = call fGetTagPartnerID(ID, 1);
+					
+					}
+		} else if map(Assistd) && map(SWITCH) = 0 && map(tripleMenace) = 0 && map(variableCross) = 0 { 
+			if 	PlayerID(Map(_iksys_tagCurrentID)),stateno !=[const(superAttacksStartStateno),const(superAttacksEndStateno)]{
+				 		
+					teammapset{map:"ASSISTTYPE";value:1}					
+					let partnerID = call fGetTagPartnerID(ID, -1);
+					}
+				 	
+		} else if map(Assistw) && map(SWITCH) = 0 && map(tripleMenace) = 0 && map(variableCross) = 0 { 
+			if 	PlayerID(Map(_iksys_tagCurrentID)),stateno !=[const(superAttacksStartStateno),const(superAttacksEndStateno)]{ 
+				 		
+					teammapset{map:"ASSISTTYPE";value:1}
+					let partnerID = call fGetTagPartnerID(ID, 1);
+					}
+				 
+				} 
+				ignorehitpause if $partnerID > 0 && PlayerID($partnerID),StateNo = Const(StateTagWaitingOutside) {
+					MapSet{map: "_iksys_tagSwitchDist"; value: BackEdgeDist * LocalScale; redirectid: $partnerID}
+				ignorehitpause if (playerID($partnerID),map(COOLDOWN) = playerID($partnerID),const(TagAssistCooldown)) || map(gotSnaped) {	
+					ignorehitpause if ((map(partnersAlive) > 1 && map(partner2isSuperAssist) && map(partner1isSuperAssist)) || 
+					(map(partnersAlive) = 1 && (map(partner2isSuperAssist) || map(partner1isSuperAssist)) && map(SuperAssistw) && map(SuperAssistd)) ) && 
+					const(tripleMenace) = 1 && map(tripleMenaceCooldown) = 0 {
+							TeamMapSet{map:"tripleMenaceCooldown"; value: 150}
+							TeamMapSet{map:"tripleMenace"; value: 1}
+							teammapset{map:"partner2isSuperAssist";value:0}
+							teammapset{map:"partner1isSuperAssist";value:0}
+						} 
+					teammapset{map:"ASSISTINPROCESS";value:PlayerID($partnerID),const(TagAssistCooldown)+map(tauntTimeForSwitch)}
+						if map(variableCross) > 0 && map(variableCrossIsOn) = 0 {
+						TeamMapSet{map: "variableCrossIsOn"; value: 1}
+						ChangeState{value: Const(StateTagEnteringScreen); redirectid: $partnerID}						
+						}
+					#; for normal default Ikemen Go switch
+						if (map(gotSnaped)) || (stateno = 56910) {
+							TeamMapSet{map: "_iksys_tagCurrentID"; value: $partnerID}
+							if const(reverseSnapBack) = 0 {
+								MapSet{map: "_iksys_tagSwitchDist"; value: BackEdgeDist * LocalScale; redirectid: $partnerID}
+								ChangeState{value: 56250; redirectid: $partnerID}}
+							if const(reverseSnapBack) = 1 {
+								TeamMapSet{map: "reverseSnapbackIsOn"; value:1}
+								ChangeState{value: Const(StateTagEnteringScreen); redirectid: $partnerID}
+							}
+						}
+						if (map(SWITCH) = 1 || map(SUPERSWITCH) = 1) && !map(gotSnaped) && stateno != 56910 {
+							teammapset{map:"justSwitched";value:170}
+							TeamMapSet{map: "_iksys_tagCurrentID"; value: $partnerID}
+							ChangeState{value: Const(StateTagEnteringScreen); redirectid: $partnerID}
+						}
+						if const(mvc1switch)= 1 && map(SUPERSWITCH) = 1 {
+							TeamMapSet{map: "_iksys_tagCurrentID"; value: $partnerID}
+							ChangeState{value: Const(StateTagEnteringScreen); redirectid: $partnerID}
+						}
+						if map(ASSISTTYPE) = [1,2] && map(SWITCH) = 0 {	
+							changeState{value:Const(StateTagEnteringScreen); redirectid: $partnerID}
+						}
+					}
+ 				}	
+			}
+		} 
+		else if StateNo = Const(StateTagWaitingOutside) && RoundState = 3 {
+			ChangeState{value: Const(StateTagJumpingIn); ctrl: 1}
+		} else ignorehitpause if statetype != A && map(variableCrossIsOn) = 0 && StateNo != [Const(StateTagLeavingScreen), Const(StateTagWaitingOutside)] && RoundState = 2 && enemynear,GetHitVar(isbound) = 0 && 
+		(ctrl || stateno = [0,20] || (map(tauntTimeForSwitch) = [2,4] && map(switchOnCombo) = 0) || (!map(iAmAssisting) && const(instaSwitch) && !map(SUPERSWITCH)))  {
+					ChangeState{value: Const(StateTagLeavingScreen); ctrl: 0} 
+		}  
+		
+	} else if ID = Map(_iksys_tagCurrentID) && map(JUSTDIED) = 2{
+		MapSet{map: "_iksys_tagActive"; value: 0}
+		teammapset{map:"SWITCH";value:1} 
+		let partnerID = call fGetTagPartnerID(ID, 1);
+		teammapadd{map:"partnersAlive";value:-1}
+		mapset{map:"JUSTDIED"; value:0}
+		if $partnerID > 0 {
+			mapset{map:"SWITCHAFTERBEAT";value:1}
+			MapSet{map: "_iksys_tagSwitchDist"; value: BackEdgeDist * LocalScale; redirectid: $partnerID}
+			TeamMapSet{map: "_iksys_tagCurrentID"; value: $partnerID}
+			ChangeState{value: 56250; redirectid: $partnerID}
+		}
+	}
+	# Red Life regeneration
+	if Standby && RedLife > 0 && (Time % 30) = 0 {
+		let regenVal = min(RedLife, ceil(LifeMax/200)); #0.5% LifeMax per 0.5s
+		LifeAdd{value: $regenVal; absolute: 1}
+		RedLifeAdd{value: -$regenVal; absolute: 1}
+	}
+}
+
+if roundstate = [0,1] {
+	teammapset{map:"partnersAlive"; value : numpartner}
+}
+
+if roundstate = 2 && TeamMode = Tag {
+		
+        if map(tauntTimeForSwitch) > 10 && anim = const(tauntWhileWaitingForPartners) && map(SWITCH){
+        NotHitBy{value: SCA; time: 3}
+        }
+			
+		if map(tripleMenace) && (ctrl && power >= 3000 && statetype != A) && map(SWITCH) = 0 && stateno != 56950{
+				ChangeState{value: 56950; ctrl: 0}							
+		}
+		ignorehitpause if map(ASSISTINPROCESS) && stateno = [const(specialAttacksStartStateno),const(superAttacksEndStateno)]	{
+			assertspecial{flag:nojugglecheck;} 
+			assertspecial{flag:nojugglecheck; redirectid: $partnerID} 
+		}
+		
+		ignorehitpause if stateno  = 56950 && map(tripleMenace) && partner,stateno != const(StateTagEnteringScreen) {
+	       	teammapset{map:"tripleMenace";value:0} 	
+			ChangeState{value:Const(StateTagAssistHyper);ctrl:0}
+		}				
+		ignorehitpause if stateno  = 56950 && map(tripleMenace) && partner,stateno = const(StateTagEnteringScreen) {
+			Ctrlset{value:0} 
+		}		
+		
+if numenemy {if enemynear,ID != enemynear,map(_iksys_tagCurrentID) && enemynear,Teammode = Tag {AssertSpecial{flag: noautoturn}}} 
+if !alive && stateno = [5000,5120] {mapset{map:"JUSTDIED"; value:1}}
+if !alive && stateno = 5150 {mapset{map:"JUSTDIED"; value:2} tagout{}}
+if map(ASSISTTYPE) = 1 {mapset{map:"ASSISTMOVE"; value:Const(StateTagAssistSuper);}}
+if map(ASSISTTYPE) = 2 {mapset{map:"ASSISTMOVE"; value:Const(StateTagAssistHyper);}}
+
+if teamleader != playerno && map(iAmNotTeamleaderAnymore) > 50  && (stateno = [Const(specialAttacksStartStateno),Const(superAttacksEndStateno)] || stateno = Const(StateTagEnteringScreen)) { 
+	mapset{map:"iAmAssisting";value:1;}
+} else {
+	mapset{map:"iAmAssisting";value:0;}
+	}
+	
+ignorehitpause if teamleader != playerno {
+	ignorehitpause if movetype = H || InCustomState || stateno = [5030,5050] {screenBound{value: 1; moveCamera: 0, 0}} #so the camera do not follow assist 
+	mapadd{map:"iAmNotTeamleaderAnymore";value:1;}
+	} else {
+	mapset{map:"iAmNotTeamleaderAnymore";value:0;}
+	}
+	
+}
+[Statedef -4]
+#===============================================================================
+#; Removing helpers 
+#===============================================================================
+
+ignorehitpause if ID != Map(_iksys_tagCurrentID) && roundstate = 2 && Teammode = Tag  && map(variableCrossIsOn) = 0 {
+	assertspecial{flag:Nohardcodedkeys;flag2:noinput} ctrlset{value:0;}
+}
+
+if const(HidePartnerHelpersExplods) = 1 { 
+
+if ishelper && roundstate = 2  {	
+		if root,stateno = Const(StateTagWaitingOutside) || root,stateno = Const(StateTagLeavingScreen) {
+		assertspecial{flag:invisible;} 
+		modifyExplod{trans:add;alpha:0, 256-0;}	 
+		}
+
+	if root,stateno = Const(StateTagEnteringScreen) && root,time = 1  {
+	modifyExplod{removetime:1}
+		}
+	}
+	
+if !ishelper && roundstate = 2  { 
+
+	if stateno = Const(StateTagWaitingOutside) || stateno = Const(StateTagLeavingScreen) {
+	modifyExplod{trans:add;alpha:0, 256-0;}	
+		}
+		
+	if stateno = Const(StateTagEnteringScreen) && time = 1  {
+	modifyExplod{removetime:1}
+		}
+	}	
+}
+
+if roundstate = [1,2] && teamside = 1 && !ishelper && playerno != teamleader {
+#;printtoconsole {text: "ainprocess = %v, triplemenace = %v, cooldown = %v, assisttype = %v , switch= %v, superswitch = %v, partnerIsReady = %v, alive = %v"; params:map(ASSISTINPROCESS), map(tripleMenace), map(COOLDOWN), map(ASSISTTYPE), map(SWITCH), map(SUPERSWITCH), map(partnerIsReady), map(_iksys_tagCurrentID)}
+#;printtoconsole {text: "map(tauntTimeForSwitch) = %v / switch = %v / assistinprocess = %v"; params:map(tauntTimeForSwitch), map(SWITCH), map(ASSISTINPROCESS)}
+	
+} 
+
+
+#;====================================================================================
+#;Special conditions for some tag switch and assist call, mostly helpers and custom states
+#;====================================================================================
+ignorehitpause if (stateno = [5000,5001] || stateno = [5010,5011] || stateno = [5020,5021]) || (incustomstate) {
+	mapset{map:"iAmBeingHit";value:1;}
+} else {mapset{map:"iAmBeingHit";value:0;}}
+
+ignorehitpause if (stateno = [120,154]) {
+	mapset{map:"iAmGuarding";value:1;}
+} else {mapset{map:"iAmGuarding";value:0;}}
+
+ignorehitpause if enemynear,map(iAmBeingHit) && 
+((stateno = const(StateTagAssistHyperCustom1) && time =  [const(hyperTimeStartCustom1),const(hyperTimeEndCustom1)]) || 
+(stateno = const(StateTagAssistHyperCustom2) && time =  [const(hyperTimeStartCustom2),const(hyperTimeEndCustom2)]) ||
+(stateno = const(StateTagAssistHyperCustom3) && time =  [const(hyperTimeStartCustom3),const(hyperTimeEndCustom3)]) ||
+(stateno = const(StateTagAssistHyperCustom4) && time =  [const(hyperTimeStartCustom4),const(hyperTimeEndCustom4)]) ||
+(stateno = const(StateTagAssistHyperCustom5) && time =  [const(hyperTimeStartCustom5),const(hyperTimeEndCustom5)])) { 
+	mapset{map:"customHyperSwitch";value:1;}
+} else {mapset{map:"customHyperSwitch";value:0;}}
+
+ignorehitpause if (enemynear,map(iAmBeingHit) || enemynear,map(iAmGuarding)) && 
+(stateno = const(StateTagAssistSpecialCustom1) && time =  [const(specialTimeStartCustom1),const(specialTimeEndCustom1)])  || 
+(stateno = const(StateTagAssistSpecialCustom2) && time =  [const(specialTimeStartCustom2),const(specialTimeEndCustom2)])  || 
+(stateno = const(StateTagAssistSpecialCustom3) && time =  [const(specialTimeStartCustom3),const(specialTimeEndCustom3)])  || 
+(stateno = const(StateTagAssistSpecialCustom4) && time =  [const(specialTimeStartCustom4),const(specialTimeEndCustom4)])  || 
+(stateno = const(StateTagAssistSpecialCustom5) && time =  [const(specialTimeStartCustom5),const(specialTimeEndCustom5)])  || 
+(stateno = const(StateTagAssistSpecialCustom6) && time =  [const(specialTimeStartCustom6),const(specialTimeEndCustom6)])  ||
+(stateno = const(StateTagAssistSpecialCustom7) && time =  [const(specialTimeStartCustom7),const(specialTimeEndCustom7)])  ||  
+(stateno = const(StateTagAssistSpecialCustom8) && time =  [const(specialTimeStartCustom8),const(specialTimeEndCustom8)]) { 
+	mapset{map:"customSpecialSwitch";value:1;}
+} else {mapset{map:"customSpecialSwitch";value:0;}}
+
+
+#;====================================================================================
+#;SnapBack activation, Air Switch Activation and Variable Cross
+#;====================================================================================
+ignorehitpause if ID = Map(_iksys_tagCurrentID) && roundstate = 2 && Teammode = Tag {
+
+	if ((command="snapbackF" && map(previousPartnerIsReady)) || (command="snapbackB" && map(nextPartnerIsReady))) && ctrl && stateno = const(StateStand) && const(snapBack) = 1 && map(variableCrossIsOn) = 0 && power >= 999 {
+		if const(reverseSnapBack) = 0 {
+			if command="snapbackF" {teammapset{map:"ForcedSwitch"; value:1; redirectid:enemynear,id}}
+			if command="snapbackB" {teammapset{map:"ForcedSwitch"; value:2; redirectid:enemynear,id}}
+		}
+		if const(reverseSnapBack) > 0 {
+			if command="snapbackF" {teammapset{map:"ForcedSwitch"; value:1;}}
+			if command="snapbackB" {teammapset{map:"ForcedSwitch"; value:2;}}
+		}
+		 changestate{value:56960;ctrl:0}
+ 	}
+ 	if ((command="tagbutton1" && map(previousPartnerIsReady)) || (command="tagbutton2" && map(nextPartnerIsReady))) && const(airSwitch) >  0 && power > 999 && stateno=[const(airAttacksStartStateno),const(airAttacksEndStateno)] && movehit && enemynear,statetype = A && map(partnerIsReady)>0 && map(variableCrossIsOn) = 0  {
+		if command="tagbutton1" {teammapset{map:"airSwitchCalled"; value:1;}}
+		if command="tagbutton2" {teammapset{map:"airSwitchCalled"; value:2;}}
+		MoveHitReset{}
+	    changestate{value:56910;ctrl:0}
+ 	}
+ 	if ((command="variableCross1" && map(previousPartnerIsReady)) || (command="variableCross2" && map(nextPartnerIsReady))) && map(variableCross) = 0 && power > 2999 && ctrl && stateno = [0,20] && enemynear,statetype != A && ((map(partnersAlive) > 1 && map(partnerIsReady)>1) || (map(partnersAlive) = 1 && map(partnerIsReady)=1)) && 
+ 	map(variableCrossIsOn) = 0 && const(variableCross) = 1 && map(variableCrossCooldown) = 0 && map(ASSISTINPROCESS) = 0 {
+	 	if command="variableCross1" {teammapset{map:"partnerForVariableCross"; value:1;}}
+		if command="variableCross2" {teammapset{map:"partnerForVariableCross"; value:2;}}
+		teammapset{map:"variableCross"; value:const(variableCrossTime);}
+		changestate{value:const(tauntAfterSwitching);ctrl:0}
+	}
+	
+	#: BUFFER for TAG COMMANDS
+	if command = "HoldDown" && (ailevel = 0 || var(const(charAiVar))=0) {
+		mapadd{map:"HoldDown"; value:1;}
+	} else {
+		mapset{map:"HoldDown"; value:0;}
+	}
+	if (map(HoldDown) > 20 || (!const(variableCross) && map(HoldDown))) && map(ASSISTINPROCESS)=0  {
+	if (command = "tagbutton2" && map(nextPartnerIsReady)) && (command != "HoldFwd" && command != "HoldBack") { mapset{map:"SwitchB"; value:1;}}
+	if (command = "tagbutton1" && map(previousPartnerIsReady)) && (command != "HoldFwd" && command != "HoldBack") { mapset{map:"SwitchA"; value:1;}}
+	} else {
+		mapset{map:"SwitchA"; value:0;}
+		mapset{map:"SwitchB"; value:0;} 
+	}
+	#;assist
+	if command = "Assistd" && map(Assistd) = 0 && const(partnerAssistOn) > 0 && ((map(ASSISTINPROCESS)=0 && const(onlyOneAssistPerTurn) = 1) || const(onlyOneAssistPerTurn) = 0) {
+	mapset{map:"Assistd"; value:10;}
+	}
+	if command = "Assistw" && map(Assistw) = 0 && const(partnerAssistOn) > 0 && ((map(ASSISTINPROCESS)=0 && const(onlyOneAssistPerTurn) = 1) || const(onlyOneAssistPerTurn) = 0) {
+	mapset{map:"Assistw"; value:10;}
+	}	
+	if map(Assistd) > 0 {
+	mapadd{map:"Assistd"; value:-1;}
+	}
+	if map(Assistw) > 0 {
+	mapadd{map:"Assistw"; value:-1;}
+	}
+	#;super assist
+	if ((const(partnerSuperAssistOn) > 0) ||
+	(const(partnerSuperAssistOn) = 0 && const(tripleMenace) = 1 && command = "SuperAssistw" && map(partnerIsReady) >= map(partnersAlive) ))
+	&& command = "SuperAssistd" && map(SuperAssistd) = 0 {
+	mapset{map:"SuperAssistd"; value:10;}
+	}
+	
+	if ((const(partnerSuperAssistOn) > 0) ||
+	(const(partnerSuperAssistOn) = 0 && const(tripleMenace) = 1 && command = "SuperAssistd" && map(partnerIsReady) >= map(partnersAlive) )) 
+	&& command = "SuperAssistw" && map(SuperAssistw) = 0 {
+	mapset{map:"SuperAssistw"; value:10;}
+	}
+		
+	if map(SuperAssistd) > 0 {
+	mapadd{map:"SuperAssistd"; value:-1;}
+	}
+	if map(SuperAssistw) > 0 {
+	mapadd{map:"SuperAssistw"; value:-1;}
+	}
+
+}
+
+#;====================================================================================
+#;Map Resetting
+#;====================================================================================
+
+if map(tripleMenaceCooldown) > 0 {TeamMapAdd{map: "tripleMenaceCooldown"; value:-1}}
+if map(partner2isSuperAssist) > 0 {teammapadd{map:"partner2isSuperAssist";value:-1}}
+if map(partner1isSuperAssist) > 0 {teammapadd{map:"partner1isSuperAssist";value:-1}}
+if map(justSuperSwitched) > 0 { teammapadd{map:"justSuperSwitched"; value:-1}}
+if map(tauntTimeForSwitch) > 0 {teammapadd{map:"tauntTimeForSwitch";value:-1}}
+if map(airSwitchHit) > 0 {mapadd{map:"airSwitchHit";value:-1}}
+ignorehitpause if map(variableCross) > 0 && ID = Map(_iksys_tagCurrentID) {
+	teammapadd{map:"variableCross"; value:-1;}
+	ignorehitpause if map(variableCross) > 2 {powerset{value:5000;} }
+	ignorehitpause if map(variableCross) = [1,2] {TeamMapSet{map: "variableCrossIsOn"; value: 0} powerset{value:0;} TeamMapSet{map: "variableCrossCooldown"; value: const(variableCrossCooldown)} }
+	}
+
+	
+ignorehitpause if ID = Map(_iksys_tagCurrentID) && map(variableCrossCooldown) > 0 {
+	teammapadd{map:"variableCrossCooldown"; value:-1;}
+}
+
+if roundstate != 2 && map(ASSISTINPROCESS)=0  {
+		mapset{map:"JUSTDIED"; value:0}
+		mapset{map:"COOLDOWN";value:const(TagAssistCooldown)}
+		teammapset{map:"ASSISTTYPE"; value:0}
+		teammapset{map:"SWITCH"; value:0}
+		teammapset{map:"SUPERSWITCH"; value:0}
+		teammapset{map:"tripleMenace";value:0}
+}
+
+if roundstate = 2 && teammode = tag && !ishelper   {
+
+
+if playerno = teamleader{
+let previousPartner = call fGetTagPartnerID(ID,-1);
+let nextPartner = call fGetTagPartnerID(ID,1);
+mapset{map:"previousPartner";value: $previousPartner;}
+mapset{map:"nextPartner";value: $nextPartner;}
+	if teamside = 1 {
+		#;printtoconsole{text:"previous %v";params:map(previousPartnerIsReady)}
+		#;printtoconsole{text:"next %v";params:map(nextPartnerIsReady)}			
+	}
+	if playerid(map(previousPartner)),map(COOLDOWN) = playerid(map(previousPartner)),const(TagAssistCooldown) {
+		mapset{map:"previousPartnerIsReady";value: 1;}
+	} else {mapset{map:"previousPartnerIsReady";value: 0;}}
+	if playerid(map(nextPartner)),map(COOLDOWN) = playerid(map(nextPartner)),const(TagAssistCooldown) {
+		mapset{map:"nextPartnerIsReady";value: 1;}
+	} else {mapset{map:"nextPartnerIsReady";value: 0;}}
+}
+
+if map(partnerIsReady) >= map(partnersAlive) && map(ASSISTINPROCESS)=0 {
+	
+	if map(ASSISTTYPE) > 0 { 
+		teammapset{map:"ASSISTTYPE"; value:0}
+	}
+
+	if map(SWITCH) > 0 { 
+		teammapset{map:"SWITCH"; value:0}
+	}
+
+	if map(SUPERSWITCH) > 0 { 
+		teammapset{map:"SUPERSWITCH"; value:0}
+	}
+
+	if map(tripleMenace) > 0 { 
+	teammapset{map:"tripleMenace"; value:0}
+	}
+}
+	#;this is for correcting a bug when switch is called while partner is assisting.
+	if anim = const(tauntWhileWaitingForPartners) && map(tauntTimeForSwitch) = 0 && stateno != 56950 && movetype != H{
+		ctrlset{value:1}
+}
+	if map(justSwitched) > 0 {
+		teammapadd{map:"justSwitched";value:-1}
+	}
+}
+
+if roundstate = [2,3] && teammode = tag && !ishelper {
+	if map(ASSISTINPROCESS)>0 && enemynear,PauseTime = 0 {
+		if map(ASSISTINPROCESS)= [2,3]  {
+			teammapset{map:"ASSISTTYPE"; value:0}
+			teammapset{map:"SWITCH"; value:0}
+			teammapset{map:"SUPERSWITCH"; value:0}
+			teammapset{map:"tripleMenace";value:0}	
+		}
+		teammapadd{map:"ASSISTINPROCESS"; value:-1}
+		}
+		
+		
+			#;debug
+			ignorehitpause if map(snapBackSuccessful) > 0 { teammapadd{map:"snapBackSuccessful"; value:-1} }
+			
+ignorehitpause if teamside = 1 && teamleader = playerno && gamemode = "training" {
+if map(turningDebugMode) > 0 {mapadd{map:"turningDebugMode";value:-1;}}
+if command = "start" && map(debugModeOn) = 0 && !map(turningDebugMode) { teammapset{map:"debugModeOn";value:1;} mapset{map:"turningDebugMode";value:10;}}
+if command = "start" && map(debugModeOn) = 1 && !map(turningDebugMode) { teammapset{map:"debugModeOn";value:0;} mapset{map:"turningDebugMode";value:10;}}
+ignorehitpause if map(debugModeOn) = 0 {
+text{removetime:2; text:"Team Leader Stateno = %v ctrl = %v"; layerno:1; pos:(screenwidth/2),(65*localscale); scale:0.4,0.4; align:0 ;params:stateno,ctrl; font:F9;}
+text{removetime:2; text:"%v"; layerno:1; pos:((screenwidth/2)+90),(75*localscale); scale:0.4,0.4; align:0 ;params:time;font:F9;}
+text{removetime:2; text:"Team Leader Anim and time = %v"; layerno:1; pos:(screenwidth/2),(75*localscale); scale:0.4,0.4; align:0 ;params:anim; font:F9;}
+text{removetime:2; text:"Partner Stateno = %v"; layerno:1; pos:(screenwidth/2),(85*localscale); scale:0.4,0.4; align:0 ;params:partner,stateno; font:F9;}
+text{removetime:2; text:"Partners Ready = %v"; layerno:1; pos:(screenwidth/2),(95*localscale); scale:0.4,0.4; align:0 ;params:map(partnerIsReady); font:F9;}
+text{removetime:2; text:"Enemynear Stateno = %v"; layerno:1; pos:(screenwidth/2),(105*localscale); scale:0.4,0.4; align:0 ;params:enemynear,stateno; font:F9;}	
+text{removetime:2; text:"Enemynear Partner Stateno = %v"; layerno:1; pos:(screenwidth/2),(115*localscale); scale:0.4,0.4; align:0 ;params:partner,prevstateno; font:F9;}				
+			}
+			
+		}
+	}	
+
+#;====================================================================================
+#;AI deactivation ONLY FOR WINMUGEN ACTIVATION
+#;====================================================================================
+ignorehitpause if playerno != teamleader && teammode = tag && roundstate = 2 {
+	var(const(charAiVar)) := 0;
+	ignorehitpause if var(const(charAiVar)) > 0 {
+		var(const(charAiVar)) := 0;
+	} 
+}
+
+#;====================================================================================
+#;Custom State Not Hit by
+#;====================================================================================
+#;ignorehitpause if teammode = tag && roundstate = 2 && playerno = teamleader && enemynear,playerno = enemynear,teamleader {
+#;ignorehitpause if incustomstate && statetype != L {
+#;	nothitby{value:SCA;time:1}
+#;	}
+
+#;ignorehitpause if enemynear,incustomstate && enemynear,statetype != L {
+#;	nothitby{value:SCA;time:1}
+#;	}
+#;}
+
+#;====================================================================================
+#;Combo detection
+#;====================================================================================
+
+ignorehitpause if roundstate = 2 && teammode = tag && !ishelper && power > 999 && playerno = teamleader {
+	ignorehitpause if ((stateno = [const(normalAttacksStartStateno),const(normalAttacksEndStateno)] && statetype != A) || 
+	(stateno = [const(specialAttacksStartStateno),const(specialAttacksEndStateno)])) && 
+	(movehit || (ProjHitTime(0) != -1 && ProjHitTime(0) < 30) || map(customSpecialSwitch)) && 
+	const(switchOnNormalOrSpecial) > 0 {
+	teammapset{map:"switchOnCombo"; value: 1}
+	} else {teammapset{map:"switchOnCombo"; value: 0}}
+}
+
+#;====================================================================================
+#; Guard detection
+#;====================================================================================
+
+ignorehitpause if roundstate = 2 && teammode = tag && !ishelper && stateno = [120,155] && playerno = teamleader && const(assistCallWhileGuarding) {
+	teammapset{map:"assistWhileGuarding"; value: 1}
+	} else {
+	teammapset{map:"assistWhileGuarding"; value: 0}
+}
+
+
+#;====================================================================================
+#; Fix for chars that died in a custom state
+#;====================================================================================
+
+ignorehitpause if roundstate = 2 && teammode = tag && !ishelper && stateno = 5150 && playerno = teamleader && time > 150 {
+	selfstate{value:5150;}
+}
+
+#;====================================================================================
+#;Show partners at the start of the round
+#;====================================================================================
+
+if !const(showPartnersAtIntro) {
+#do nothing
+} else {
+if (roundstate = [0,1] || (roundstate = 2 && map(absoluteTime) < 50 && !ishelper)) && teamleader != playerno  {
+	assertspecial{flag:invisible}
+	if (stateno = [190,194] || stateno = 21) && !ishelper {changestate{value:0}}
+	}
+
+#;for training mode
+if roundstate = 2 && map(absoluteTime) < 52 {
+	mapadd{map:"absoluteTime"; value:1}
+	} 
+}
+
+#;====================================================================================
+#;Teaching the AI how and when to use the switch
+#;====================================================================================
+
+if ctrl && map(ASSISTINPROCESS)=0 && life < 280 && statetype != A && ailevel > 0{
+	if (playerid(map(nextPartner)),life > 500 && map(nextPartnerIsReady)) { mapset{map:"SwitchB"; value:1;}}
+	if (playerid(map(previousPartner)),life > 500 && map(previousPartnerIsReady))  { mapset{map:"SwitchA"; value:1;}}
+	}
+ignorehitpause if teamleader = playerno && teamside = 1 && !ishelper && roundstate = 2 && stateno = [200,950]{
+	printtoconsole{text:"stateno = %v";params:stateno}
+} 

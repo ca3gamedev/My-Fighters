@@ -1,0 +1,42 @@
+{
+  "modes": {
+    "arcade": {
+      "playtime": 650.8,
+      "clear": 2,
+      "clearcount": {
+        "heroe2": 2
+      },
+      "ranking": [
+        {
+          "score": 62700,
+          "time": 319.85,
+          "name": "AAA",
+          "chars": [
+            "heroe2",
+            "heroe2"
+          ],
+          "tmode": 3,
+          "ailevel": 5,
+          "win": 1,
+          "lose": 0,
+          "consecutive": 1
+        },
+        {
+          "score": 40300,
+          "time": 330.95,
+          "name": "AAA",
+          "chars": [
+            "heroe2",
+            "heroe2"
+          ],
+          "tmode": 3,
+          "ailevel": 5,
+          "win": 1,
+          "lose": 0,
+          "consecutive": 1
+        }
+      ]
+    }
+  },
+  "playtime": 650.8
+}

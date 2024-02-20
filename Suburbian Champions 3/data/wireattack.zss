@@ -1,0 +1,136 @@
+
+#===============================================================================
+# Wire attack states for Orochi Kyo tag air switch. Use along with 
+# tagwithsuperpause.zss
+#===============================================================================
+
+[Statedef 54400; type : A; movetype : H; physics : N; velset : 0,0; ctrl : 0;]
+
+if alive = 0 && time = 0 { Velset{x : 1; y : -5;} } 
+
+if alive = 0 && time = 1 { selfstate{value:5030;} } 
+
+if time = 0 {mapset{map:"cornerDistance";value:backedgedist;}}
+
+screenbound {value:0;movecamera:0,1}
+
+if animtime = 0 {changeanim{value:5010;elem:2}}
+
+if hitshakeover {changestate{value:54410;}}
+
+#;------------------------------------------------------------------------------
+[Statedef 54410; type : A; movetype : H; physics : N; velset : 0,0; ctrl : 0;]
+
+if  facing = enemynear,facing && time = 0 {turn{}}
+
+nothitby{value:SCA;}
+playerpush{value:0;}
+#;veladd{y:-.05}
+screenbound{value:1;movecamera:1,1;}
+
+if time = 0 {
+	if selfanimexist(5555) {changeanim{value:5555}}
+	if selfanimexist(5051) {changeanim{value:5051}}
+	posadd{y:0;}
+	velset{x:-10;}
+}
+
+if time > 5 {
+	if backedgedist = [-10,20] { changestate{value:54420} }
+	if frontedgedist = [-10,20] { changestate{value:54470} }
+	#;if Vel Y > 0 && Pos Y >= 10{ changestate{value:54130 }
+}
+
+#;------------------------------------------------------------------------------
+[Statedef 54420; type : A; movetype : H; physics : N; velset : 0,0; ctrl : 0;]
+
+playerpush{value:0;}
+changeanim{value:5012}
+posadd{x:(time%2-0.5)*5;}
+screenbound{value:1;movecamera:1,1;}
+
+if time = 15 { changestate{value:54430} }
+
+
+#;------------------------------------------------------------------------------
+[Statedef 54470; type : A; movetype : H; physics : N; velset : 0,0; ctrl : 0;]
+
+playerpush{value:0;}
+changeanim{value:5012;}
+screenbound{value:1;movecamera:0,0;}
+posadd{x:(time%2-0.5)*5;}
+
+if time = 15 {changestate{value:54480;}}
+
+#;------------------------------------------------------------------------------
+[Statedef 54430; type : A; movetype : H; physics : N; velset : 0,0; ctrl : 0;]
+
+playerpush{value:1;}
+afterimage{time:0;length:0;}
+
+if time = 0 {
+	changeanim{value:5052} 
+	turn{}
+	}
+
+persistent(0) if time = 7 {velset{x:-1/localscale;y:-3/localscale}}
+
+if time >= 10 {
+	if vel y < 0 {veladd{y:0.42}}
+	if vel y > 0 {veladd{y:0.26}}
+}
+
+persistent(0) if time > 12 && anim = 5052 && vel y >= -2{
+	changeanim{value:5061} 
+}
+
+if vel x < 0 {
+	veladd{x:0.02}
+}
+
+if time > 7 && vel y > 0 && pos y > 15 {
+	velset{x:-2;}
+}
+
+if time < 42 {
+screenbound{value:1;movecamera:1,1;}
+}
+
+if time > 7 && vel y > 0 && pos y > 15 {
+	selfstate{value:5100;}
+}
+
+
+#;------------------------------------------------------------------------------
+[Statedef 54480; type : A; movetype : H; physics : N; velset : 0,0; ctrl : 0;]
+
+playerpush{value:0;}
+afterimage{time:0;length:1}
+
+if time = 0 {changeanim{value:5030;}}
+
+if time < 42 {
+screenbound{value:1;movecamera:1,1;}
+}
+
+persistent(0) if time = 7 {
+	changeanim{value:5050;}
+	velset{x:-5.8;y:-9;} 
+}
+
+persistent(0) if anim = 5050 && vel y >= 1 && selfanimexist(anim+10){
+	changeanim{value:anim+10}
+}
+
+if time >= 10 {
+	if vel y < 0 {veladd{y:0.42}}
+	if vel y > 0 {veladd{y:0.26}}
+}
+
+if vel x < 0 {
+	veladd{x:0.02;}
+}
+
+if time > 7 && vel y > 0 && pos y > 15 {
+	selfstate{value:5100;}
+}
