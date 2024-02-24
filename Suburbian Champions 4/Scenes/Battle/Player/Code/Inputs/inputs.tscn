@@ -1,0 +1,19 @@
+[gd_scene load_steps=5 format=3 uid="uid://c4ytlv4cl57u6"]
+
+[ext_resource type="Script" path="res://Scenes/Battle/Player/Code/Inputs/inputs.gd" id="1_t6n00"]
+[ext_resource type="Script" path="res://Scenes/Battle/Player/Code/Inputs/P1Input.gd" id="2_dw0ak"]
+[ext_resource type="Script" path="res://Scenes/Battle/Player/Code/Inputs/Buffer.gd" id="3_nktud"]
+[ext_resource type="Script" path="res://Scenes/Battle/Player/Code/Inputs/GetCommand.gd" id="4_rnnr2"]
+
+[node name="Inputs" type="Node"]
+script = ExtResource("1_t6n00")
+
+[node name="P1Input" type="Node" parent="."]
+script = ExtResource("2_dw0ak")
+
+[node name="Buffer" type="Node" parent="."]
+unique_name_in_owner = true
+script = ExtResource("3_nktud")
+
+[node name="GetCommand" type="Node" parent="."]
+script = ExtResource("4_rnnr2")

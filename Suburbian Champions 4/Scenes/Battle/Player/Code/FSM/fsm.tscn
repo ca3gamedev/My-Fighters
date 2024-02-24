@@ -1,0 +1,10 @@
+[gd_scene load_steps=3 format=3 uid="uid://brpesqi1qyubu"]
+
+[ext_resource type="Script" path="res://Scenes/Battle/Player/Code/FSM/fsm.gd" id="1_5i4ep"]
+[ext_resource type="Script" path="res://Scenes/Battle/Player/Code/FSM/Inputs.gd" id="2_x7r63"]
+
+[node name="FSM" type="Node"]
+script = ExtResource("1_5i4ep")
+
+[node name="Inputs" type="Node" parent="."]
+script = ExtResource("2_x7r63")

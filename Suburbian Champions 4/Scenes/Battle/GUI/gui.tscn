@@ -1,0 +1,22 @@
+[gd_scene load_steps=2 format=3 uid="uid://cpmrf30gyqrn8"]
+
+[ext_resource type="Script" path="res://Scenes/Battle/GUI/gui.gd" id="1_5x1d7"]
+
+[node name="GUI" type="Node2D"]
+script = ExtResource("1_5x1d7")
+
+[node name="CanvasLayer" type="CanvasLayer" parent="."]
+
+[node name="Input" type="Label" parent="CanvasLayer"]
+offset_left = 23.0
+offset_top = 20.0
+offset_right = 598.0
+offset_bottom = 224.0
+text = "My input"
+
+[node name="delta" type="Label" parent="CanvasLayer"]
+offset_left = 26.0
+offset_top = 52.0
+offset_right = 601.0
+offset_bottom = 256.0
+text = "My input"

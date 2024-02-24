@@ -1,0 +1,76 @@
+[gd_scene load_steps=14 format=3 uid="uid://0dpygmqytiij"]
+
+[ext_resource type="Script" path="res://Scenes/Battle/Player/player.gd" id="1_adcw5"]
+[ext_resource type="Texture2D" uid="uid://dj27kh8a4uy7s" path="res://2D/raw sprites/IDLE/hero_export_IDLE_1.png" id="1_tj0hj"]
+[ext_resource type="Texture2D" uid="uid://c20icyaq7rb4m" path="res://2D/raw sprites/IDLE/hero_export_IDLE_2.png" id="2_xt8xl"]
+[ext_resource type="Texture2D" uid="uid://dwbwhq3vkdsfe" path="res://2D/raw sprites/IDLE/hero_export_IDLE_3.png" id="3_piy4h"]
+[ext_resource type="Texture2D" uid="uid://c0t434700233b" path="res://2D/raw sprites/IDLE/hero_export_IDLE_4.png" id="4_s8g23"]
+[ext_resource type="Texture2D" uid="uid://bcccwrve16k37" path="res://2D/raw sprites/IDLE/hero_export_IDLE_5.png" id="5_u71e2"]
+[ext_resource type="Texture2D" uid="uid://bmc5t2myddwk6" path="res://2D/raw sprites/IDLE/hero_export_IDLE_6.png" id="6_uxvs7"]
+[ext_resource type="Texture2D" uid="uid://c5rb2uggdl3cy" path="res://2D/raw sprites/IDLE/hero_export_IDLE_7.png" id="7_k1ilu"]
+[ext_resource type="Texture2D" uid="uid://cacf2giejoykg" path="res://2D/raw sprites/IDLE/hero_export_IDLE_8.png" id="8_nxthc"]
+[ext_resource type="PackedScene" uid="uid://c4ytlv4cl57u6" path="res://Scenes/Battle/Player/Code/Inputs/inputs.tscn" id="10_bdh5b"]
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_01gaf"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("1_tj0hj")
+}, {
+"duration": 1.0,
+"texture": ExtResource("2_xt8xl")
+}, {
+"duration": 1.0,
+"texture": ExtResource("3_piy4h")
+}, {
+"duration": 1.0,
+"texture": ExtResource("4_s8g23")
+}, {
+"duration": 1.0,
+"texture": ExtResource("5_u71e2")
+}, {
+"duration": 1.0,
+"texture": ExtResource("6_uxvs7")
+}, {
+"duration": 1.0,
+"texture": ExtResource("7_k1ilu")
+}, {
+"duration": 1.0,
+"texture": ExtResource("8_nxthc")
+}],
+"loop": true,
+"name": &"IDLE",
+"speed": 5.0
+}]
+
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_yth17"]
+radius = 15.0
+height = 110.0
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_kol7m"]
+radius = 3.16228
+
+[node name="Player" type="CharacterBody2D"]
+script = ExtResource("1_adcw5")
+
+[node name="Parent" type="Node2D" parent="."]
+
+[node name="Player" type="AnimatedSprite2D" parent="Parent"]
+position = Vector2(-1, 0)
+sprite_frames = SubResource("SpriteFrames_01gaf")
+animation = &"IDLE"
+centered = false
+offset = Vector2(-101, -149)
+metadata/_edit_lock_ = true
+
+[node name="Hitbox" type="CharacterBody2D" parent="Parent"]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Parent/Hitbox"]
+position = Vector2(-4, -51)
+shape = SubResource("CapsuleShape2D_yth17")
+
+[node name="Pivot" type="CollisionShape2D" parent="."]
+shape = SubResource("CircleShape2D_kol7m")
+
+[node name="Inputs" parent="." instance=ExtResource("10_bdh5b")]
+IdleBuffer = 1.0

@@ -1,0 +1,14 @@
+[gd_scene load_steps=4 format=3 uid="uid://bd133ipwtbcrd"]
+
+[ext_resource type="PackedScene" uid="uid://dephqwih651hu" path="res://Scenes/Battle/Managers/player_manager.tscn" id="1_eb26d"]
+[ext_resource type="PackedScene" uid="uid://dy1nsies1ig7x" path="res://Scenes/Battle/Managers/level_manager.tscn" id="2_kfmxn"]
+[ext_resource type="PackedScene" uid="uid://cpmrf30gyqrn8" path="res://Scenes/Battle/GUI/gui.tscn" id="3_5w4ft"]
+
+[node name="Root" type="Node2D"]
+
+[node name="PlayerManager" parent="." instance=ExtResource("1_eb26d")]
+
+[node name="LevelManager" parent="." instance=ExtResource("2_kfmxn")]
+
+[node name="GUI" parent="." instance=ExtResource("3_5w4ft")]
+position = Vector2(-104, -80)
