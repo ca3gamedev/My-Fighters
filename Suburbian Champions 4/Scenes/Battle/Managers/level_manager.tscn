@@ -1,17 +1,67 @@
-[gd_scene load_steps=2 format=3 uid="uid://dy1nsies1ig7x"]
+[gd_scene load_steps=5 format=3 uid="uid://dy1nsies1ig7x"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_lj2ye"]
-size = Vector2(657, 92)
+size = Vector2(1382, 92)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_p2ed6"]
+size = Vector2(41, 470)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_e2sxk"]
+size = Vector2(100, 842)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_phkcl"]
+size = Vector2(1615, 95)
 
 [node name="LevelManager" type="Node2D"]
 
-[node name="StaticBody2D" type="StaticBody2D" parent="."]
+[node name="StaticBody2D" type="StaticBody2D" parent="." groups=["GROUND"]]
 position = Vector2(130, 259)
+collision_layer = 4
+collision_mask = 6
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="StaticBody2D"]
-position = Vector2(95, 39)
+position = Vector2(154, -47)
 shape = SubResource("RectangleShape2D_lj2ye")
 
 [node name="Camera2D" type="Camera2D" parent="."]
-position = Vector2(249, 118)
+position = Vector2(198, 6)
 zoom = Vector2(1.5, 1.5)
+
+[node name="StaticBody2D" type="StaticBody2D" parent="Camera2D" groups=["WALL LEFT"]]
+position = Vector2(-416, -7)
+collision_layer = 4
+collision_mask = 6
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Camera2D/StaticBody2D"]
+position = Vector2(10.5, 5)
+shape = SubResource("RectangleShape2D_p2ed6")
+
+[node name="StaticBody2D2" type="StaticBody2D" parent="Camera2D" groups=["WALL RIGHT"]]
+position = Vector2(397, -20)
+collision_layer = 4
+collision_mask = 6
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Camera2D/StaticBody2D2"]
+position = Vector2(10.5, 5)
+shape = SubResource("RectangleShape2D_p2ed6")
+
+[node name="WALL" type="StaticBody2D" parent="." groups=["WALL LEFT"]]
+position = Vector2(-461, 15)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="WALL"]
+position = Vector2(18, -126)
+shape = SubResource("RectangleShape2D_e2sxk")
+
+[node name="WALL2" type="StaticBody2D" parent="." groups=["WALL RIGHT"]]
+position = Vector2(985, 34)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="WALL2"]
+position = Vector2(18, -126)
+shape = SubResource("RectangleShape2D_e2sxk")
+
+[node name="TOP" type="StaticBody2D" parent="."]
+position = Vector2(228, -202)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="TOP"]
+position = Vector2(77.5, -57.5)
+shape = SubResource("RectangleShape2D_phkcl")

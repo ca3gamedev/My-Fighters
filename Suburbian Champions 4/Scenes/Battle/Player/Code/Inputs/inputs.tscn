@@ -7,6 +7,7 @@
 
 [node name="Inputs" type="Node"]
 script = ExtResource("1_t6n00")
+IdleBuffer = 1.0
 
 [node name="P1Input" type="Node" parent="."]
 script = ExtResource("2_dw0ak")

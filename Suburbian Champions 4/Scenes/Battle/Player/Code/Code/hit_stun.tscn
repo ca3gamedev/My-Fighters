@@ -1,0 +1,17 @@
+[gd_scene load_steps=2 format=3 uid="uid://bxra6hk6d21jk"]
+
+[ext_resource type="Script" path="res://Scenes/Battle/Player/Code/Code/hit_stun.gd" id="1_vgdyr"]
+
+[node name="HitStun" type="Node"]
+process_mode = 3
+script = ExtResource("1_vgdyr")
+hitstun = 1.0
+
+[node name="Timer" type="Timer" parent="."]
+one_shot = true
+
+[node name="Separate" type="Timer" parent="."]
+one_shot = true
+
+[connection signal="timeout" from="Timer" to="." method="_on_timer_timeout"]
+[connection signal="timeout" from="Separate" to="." method="_on_separate_timeout"]

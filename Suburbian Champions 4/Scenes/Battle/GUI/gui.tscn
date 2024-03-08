@@ -7,16 +7,30 @@ script = ExtResource("1_5x1d7")
 
 [node name="CanvasLayer" type="CanvasLayer" parent="."]
 
-[node name="Input" type="Label" parent="CanvasLayer"]
-offset_left = 23.0
-offset_top = 20.0
-offset_right = 598.0
-offset_bottom = 224.0
-text = "My input"
-
-[node name="delta" type="Label" parent="CanvasLayer"]
+[node name="Combos" type="Label" parent="CanvasLayer"]
 offset_left = 26.0
 offset_top = 52.0
-offset_right = 601.0
-offset_bottom = 256.0
-text = "My input"
+offset_right = 125.0
+offset_bottom = 100.0
+text = "0"
+
+[node name="Combos2" type="Label" parent="CanvasLayer"]
+offset_left = 23.0
+offset_top = 28.0
+offset_right = 122.0
+offset_bottom = 76.0
+text = "Combos"
+
+[node name="CombosP2" type="Label" parent="CanvasLayer"]
+offset_left = 1000.0
+offset_top = 56.0
+offset_right = 1099.0
+offset_bottom = 104.0
+text = "0"
+
+[node name="CombosP2b" type="Label" parent="CanvasLayer"]
+offset_left = 999.0
+offset_top = 25.0
+offset_right = 1098.0
+offset_bottom = 73.0
+text = "Combos"

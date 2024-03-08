@@ -1,12 +1,14 @@
 [gd_scene load_steps=2 format=3 uid="uid://dephqwih651hu"]
 
-[ext_resource type="PackedScene" uid="uid://0dpygmqytiij" path="res://Scenes/Battle/Player/player.tscn" id="1_dar44"]
+[ext_resource type="PackedScene" uid="uid://cw156os5c5o7h" path="res://Scenes/Battle/Player/player_2.tscn" id="1_2wyx7"]
 
 [node name="PlayerManager" type="Node2D"]
 
-[node name="Player" parent="." instance=ExtResource("1_dar44")]
-position = Vector2(158, 244)
+[node name="Player" parent="." node_paths=PackedStringArray("Oponent") instance=ExtResource("1_2wyx7")]
+position = Vector2(8, 163)
 IsP1 = true
+Oponent = NodePath("../Player2")
 
-[node name="Player2" parent="." instance=ExtResource("1_dar44")]
-position = Vector2(378, 242)
+[node name="Player2" parent="." node_paths=PackedStringArray("Oponent") instance=ExtResource("1_2wyx7")]
+position = Vector2(423, 154)
+Oponent = NodePath("../Player")

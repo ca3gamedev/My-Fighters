@@ -1,0 +1,16 @@
+[gd_scene load_steps=3 format=3 uid="uid://ctvwj41xui2ir"]
+
+[ext_resource type="Script" path="res://Scenes/Battle/Player/Code/Code/code.gd" id="1_14uw3"]
+[ext_resource type="Script" path="res://Scenes/Battle/Player/Code/Code/Collision.gd" id="2_4ck36"]
+
+[node name="Code" type="Node"]
+script = ExtResource("1_14uw3")
+
+[node name="Collision" type="Node" parent="."]
+script = ExtResource("2_4ck36")
+speed_separate = 100.0
+
+[node name="CancelTimer" type="Timer" parent="."]
+one_shot = true
+
+[connection signal="timeout" from="CancelTimer" to="." method="_on_cancel_timer_timeout"]
