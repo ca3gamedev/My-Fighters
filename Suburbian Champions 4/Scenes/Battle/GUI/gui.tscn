@@ -8,29 +8,41 @@ script = ExtResource("1_5x1d7")
 [node name="CanvasLayer" type="CanvasLayer" parent="."]
 
 [node name="Combos" type="Label" parent="CanvasLayer"]
-offset_left = 26.0
-offset_top = 52.0
-offset_right = 125.0
-offset_bottom = 100.0
+offset_left = 134.0
+offset_top = 80.0
+offset_right = 233.0
+offset_bottom = 128.0
 text = "0"
 
 [node name="Combos2" type="Label" parent="CanvasLayer"]
-offset_left = 23.0
-offset_top = 28.0
-offset_right = 122.0
-offset_bottom = 76.0
+offset_left = 50.0
+offset_top = 78.0
+offset_right = 149.0
+offset_bottom = 126.0
 text = "Combos"
 
 [node name="CombosP2" type="Label" parent="CanvasLayer"]
-offset_left = 1000.0
-offset_top = 56.0
-offset_right = 1099.0
-offset_bottom = 104.0
+offset_left = 939.0
+offset_top = 71.0
+offset_right = 1038.0
+offset_bottom = 119.0
 text = "0"
 
 [node name="CombosP2b" type="Label" parent="CanvasLayer"]
-offset_left = 999.0
-offset_top = 25.0
-offset_right = 1098.0
-offset_bottom = 73.0
+offset_left = 856.0
+offset_top = 70.0
+offset_right = 955.0
+offset_bottom = 118.0
 text = "Combos"
+
+[node name="P1HP" type="ProgressBar" parent="CanvasLayer"]
+offset_left = 34.0
+offset_top = 39.0
+offset_right = 300.0
+offset_bottom = 68.0
+
+[node name="P2HP" type="ProgressBar" parent="CanvasLayer"]
+offset_left = 849.0
+offset_top = 27.0
+offset_right = 1115.0
+offset_bottom = 56.0

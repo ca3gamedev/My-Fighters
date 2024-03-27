@@ -57,7 +57,7 @@ func _on_attack_box_area_shape_entered(area_rid, area, area_shape_index, local_s
 		if get_parent().IsP1 != area.get_parent().get_parent().IsP1:
 			cancel_timer = true
 			$CancelTimer.start(0.2)
-			area.get_parent().get_parent().HIT()
+			area.get_parent().get_parent().HIT(%FSM.currentdamage)
 
 func EndCombo():
 	if $"../".IsP1:

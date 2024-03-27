@@ -4,3 +4,5 @@
 
 [node name="CombatData" type="Node"]
 script = ExtResource("1_fk282")
+P1HP = 100
+P2HP = 100

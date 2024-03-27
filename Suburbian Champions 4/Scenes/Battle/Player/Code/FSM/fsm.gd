@@ -8,6 +8,8 @@ extends Node
 @export var HitStun : Node
 @onready var current = $FALL
 
+@export var currentdamage : int
+
 func _ready():
 	Anims.active = true
 
