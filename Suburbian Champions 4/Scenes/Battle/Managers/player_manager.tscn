@@ -5,10 +5,10 @@
 [node name="PlayerManager" type="Node2D"]
 
 [node name="Player" parent="." node_paths=PackedStringArray("Oponent") instance=ExtResource("1_2wyx7")]
-position = Vector2(8, 163)
+position = Vector2(350, 151)
 IsP1 = true
 Oponent = NodePath("../Player2")
 
 [node name="Player2" parent="." node_paths=PackedStringArray("Oponent") instance=ExtResource("1_2wyx7")]
-position = Vector2(423, 154)
+position = Vector2(82, 155)
 Oponent = NodePath("../Player")
